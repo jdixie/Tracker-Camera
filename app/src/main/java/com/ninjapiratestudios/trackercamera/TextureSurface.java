@@ -64,7 +64,7 @@ public class TextureSurface implements Runnable, SurfaceTexture.OnFrameAvailable
 
     Context context;
 
-    public TextureSurface(Context c, SurfaceTexture t, int w, int h)
+    public TextureSurface(Context c, SurfaceTexture t, int h, int w)
     {
         context = c;
         texture = t;
@@ -112,11 +112,19 @@ public class TextureSurface implements Runnable, SurfaceTexture.OnFrameAvailable
     public void initializeOpenGL(){
         egl = (EGL10) EGLContext.getEGL();
         eglDisplay = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
+        if (eglDisplay == EGL10.EGL_NO_DISPLAY) {
+            throw new RuntimeException("eglGetDisplay failed " + GLUtils.getEGLErrorString(egl.eglGetError()));
+        }
 
         int[] version = new int[2];
-        egl.eglInitialize(eglDisplay, version);
+        if (!egl.eglInitialize(eglDisplay, version)) {
+            throw new RuntimeException("eglInitialize failed " + GLUtils.getEGLErrorString(egl.eglGetError()));
+        }
 
         EGLConfig eglConfig = chooseEglConfig();
+        if (eglConfig == null) {
+            throw new RuntimeException("eglConfig not initialized");
+        }
         eglContext = createContext(egl, eglDisplay, eglConfig);
 
         eglSurface = egl.eglCreateWindowSurface(eglDisplay, eglConfig, texture, null);
@@ -177,9 +185,9 @@ public class TextureSurface implements Runnable, SurfaceTexture.OnFrameAvailable
         String fragmentShaderCode = "";
 
         try {
-            InputStream is = assetManager.open("ThresholdShader.fsh");
+            InputStream is = assetManager.open("TDirectDisplayShader.fsh");
             fragmentShaderCode = is.toString();
-            is = assetManager.open("ThresholdShader.vsh");
+            is = assetManager.open("DirectDisplayShader.vsh");
             vertexShaderCode = is.toString();
         }
         catch(IOException e){
