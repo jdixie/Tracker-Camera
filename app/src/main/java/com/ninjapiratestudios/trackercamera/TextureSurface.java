@@ -1,11 +1,15 @@
 package com.ninjapiratestudios.trackercamera;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -127,6 +131,8 @@ public class TextureSurface implements Runnable, SurfaceTexture.OnFrameAvailable
             throw new RuntimeException("OpenGL initialization error: " + GLUtils.getEGLErrorString(egl.eglGetError()));
         }
 
+        loadShaders();
+
         //ready index, vertex, and texture buffers
         ByteBuffer ib = ByteBuffer.allocateDirect(indices. length * 2);
         ib.order(ByteOrder.nativeOrder());
@@ -166,7 +172,40 @@ public class TextureSurface implements Runnable, SurfaceTexture.OnFrameAvailable
     }
 
     private void loadShaders(){
+        AssetManager assetManager = context.getAssets();
+        String vertexShaderCode = "";
+        String fragmentShaderCode = "";
 
+        try {
+            InputStream is = assetManager.open("ThresholdShader.fsh");
+            fragmentShaderCode = is.toString();
+            is = assetManager.open("ThresholdShader.vsh");
+            vertexShaderCode = is.toString();
+        }
+        catch(IOException e){
+            Log.d("Shader loading error: ", e.getMessage());
+            return;
+        }
+
+
+        vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
+        GLES20.glShaderSource(vertexShaderHandle, vertexShaderCode);
+        GLES20.glCompileShader(vertexShaderHandle);
+
+        fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
+        GLES20.glShaderSource(fragmentShaderHandle, fragmentShaderCode);
+        GLES20.glCompileShader(fragmentShaderHandle);
+
+        shaderProgram = GLES20.glCreateProgram();
+        GLES20.glAttachShader(shaderProgram, vertexShaderHandle);
+        GLES20.glAttachShader(shaderProgram, fragmentShaderHandle);
+        GLES20.glLinkProgram(shaderProgram);
+
+        int[] status = new int[1];
+        GLES20.glGetProgramiv(shaderProgram, GLES20.GL_LINK_STATUS, status, 0);
+        if (status[0] != GLES20.GL_TRUE) {
+            String error = GLES20.glGetProgramInfoLog(shaderProgram);
+        }
     }
 
     public void onPause()
