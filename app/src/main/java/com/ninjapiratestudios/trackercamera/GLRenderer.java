@@ -8,11 +8,14 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.List;
 
@@ -34,10 +37,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
     private ShortBuffer indexBuffer;
     private FloatBuffer vertexBuffer;
     private FloatBuffer textureBuffer;
-    private float rectCoords[] = { -1.0f, -1.0f,
-            1.0f, -1.0f,
-            -1.0f,  1.0f,
-            1.0f,  1.0f};
+    private float rectCoords[] = { -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f};
     private float texCoords[] = { 0.0f, 1.0f,
             1.0f, 1.0f,
             0.0f, 0.0f,
@@ -121,7 +124,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
 
     @Override
     public void onDrawFrame ( GL10 unused ) {
-        GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT );
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         synchronized(this) {
             if (updateSurfaceTexture) {
@@ -162,24 +165,50 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         String fragmentShaderCode = "";
 
         try {
-            InputStream is = assetManager.open("DirectDisplayShader.fsh");
-            fragmentShaderCode = is.toString();
-            is = assetManager.open("DirectDisplayShader.vsh");
-            vertexShaderCode = is.toString();
+            InputStream fis = assetManager.open("DirectDisplayShader.fsh");
+            InputStreamReader fisr = new InputStreamReader(fis);
+            BufferedReader fbr = new BufferedReader(fisr);
+            StringBuilder fsb = new StringBuilder();
+            String next;
+            while((next = fbr.readLine()) != null){
+                fsb.append(next);
+                fsb.append('\n');
+            }
+            fragmentShaderCode = fsb.toString();
+
+            InputStream vis = assetManager.open("DirectDisplayShader.vsh");
+            InputStreamReader visr = new InputStreamReader(vis);
+            BufferedReader vbr = new BufferedReader(visr);
+            StringBuilder vsb = new StringBuilder();
+            while((next = vbr.readLine()) != null){
+                vsb.append(next);
+                vsb.append('\n');
+            }
+            vertexShaderCode = vsb.toString();
         }
         catch(IOException e){
             Log.d("Shader loading error: ", e.getMessage());
             return;
         }
-
+        IntBuffer intBuf=ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
 
         vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vertexShaderHandle, vertexShaderCode);
         GLES20.glCompileShader(vertexShaderHandle);
+        GLES20.glGetProgramiv(vertexShaderHandle, GLES20.GL_COMPILE_STATUS, intBuf);
+        if(intBuf.get(0)==0){
+            GLES20.glGetShaderiv(vertexShaderHandle, GLES20.GL_INFO_LOG_LENGTH,intBuf);
+            Log.d("Shader","Vertex Shader: " + GLES20.glGetShaderInfoLog(vertexShaderHandle));
+        }
 
         fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fragmentShaderHandle, fragmentShaderCode);
         GLES20.glCompileShader(fragmentShaderHandle);
+        GLES20.glGetProgramiv(fragmentShaderHandle, GLES20.GL_COMPILE_STATUS, intBuf);
+        if(intBuf.get(0)==0){
+            GLES20.glGetShaderiv(fragmentShaderHandle, GLES20.GL_INFO_LOG_LENGTH,intBuf);
+            Log.d("Shader","Fragment Shader: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
+        }
 
         shaderProgram = GLES20.glCreateProgram();
         GLES20.glAttachShader(shaderProgram, vertexShaderHandle);
@@ -190,6 +219,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         GLES20.glGetProgramiv(shaderProgram, GLES20.GL_LINK_STATUS, status, 0);
         if (status[0] != GLES20.GL_TRUE) {
             String error = GLES20.glGetProgramInfoLog(shaderProgram);
+            //throw new RuntimeException("Shader program compilation failure: " + error);
         }
     }
+
+    /*private void loadShaders(){
+
+    }*/
 }
