@@ -3,6 +3,7 @@ package com.ninjapiratestudios.trackercamera;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,13 +29,17 @@ import java.util.Date;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class VideoActivity extends AppCompatActivity{
+public class VideoActivity extends AppCompatActivity{ // implements TextureView.SurfaceTextureListener{
 
     Camera camera;
-    CamPreview camPreview;
+    //CamPreview camPreview;
+    GLCamView glCamView;
     MediaRecorder mediaRecorder;
     Overlay overlay;
     boolean recordingActive;
+    //TextureSurface glTextureSurface;
+    //SurfaceTexture previewTexture;
+    FrameLayout preview;
 
     //buttons
     Button recordButton;
@@ -44,29 +50,30 @@ public class VideoActivity extends AppCompatActivity{
 
         setContentView(R.layout.activity_video);
 
-        captureCamera();
+        //captureCamera();
         recordingActive = false;
-        camPreview = new CamPreview(this, camera);
-        try {
+        glCamView = new GLCamView(this);
+        //camPreview = new CamPreview(this, camera);
+        /*try {
             camera.setPreviewDisplay(camPreview.getHolder());
         }
         catch(IOException e)
         {
 
-        }
+        }*/
         overlay = new Overlay(this);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(camPreview);
-        mediaRecorder = new MediaRecorder();
-        mediaRecorder.setCamera(camera);
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(glCamView);
+        //mediaRecorder = new MediaRecorder();
+        //mediaRecorder.setCamera(camera);
+        //mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        //mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         //mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         //mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 
 
         //add the overlay to the content view
-        addContentView(overlay, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+        //addContentView(overlay, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 
         //buttons
         recordButton = (Button)findViewById(R.id.button_record);
@@ -167,4 +174,37 @@ public class VideoActivity extends AppCompatActivity{
 
         return mediaFile;
     }
+
+    /*@Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        try {
+            Camera.Size previewSize = camera.getParameters().getPreviewSize();
+            //previewTexture = new SurfaceTexture(0);
+            //camera.setPreviewDisplay(holder);
+            //glTextureSurface = new TextureSurface(this, surface, height, width);
+            camera.setPreviewTexture(surface);
+            camera.startPreview();
+            //preview.setSurfaceTexture(glTextureSurface.getVideoTexture());
+
+        } catch (IOException e) {
+            //camera preview error
+        }
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        camera.stopPreview();
+        camera.release();
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+    }*/
 }
