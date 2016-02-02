@@ -57,8 +57,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
     GLRenderer(GLCamView glcv){
         glCamView = glcv;
 
-        loadShaders();
-
         //ready index, vertex, and texture buffers
         ByteBuffer ib = ByteBuffer.allocateDirect(indices. length * 2);
         ib.order(ByteOrder.nativeOrder());
@@ -103,17 +101,23 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         try {
             camera.setPreviewTexture(surfaceTexture);
         } catch(IOException e){
-
+            throw new RuntimeException("Error setting camera preview to texture.");
         }
 
-        GLES20.glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
-
+        GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glViewport(0, 0, glCamView.getWidth(), glCamView.getHeight());
+        Camera.Size previewSize = camera.getParameters().getPreviewSize();
+        Camera.Parameters param = camera.getParameters();
+        param.setPictureSize(previewSize.width, previewSize.height);
+        param.set("orientation", "landscape");
+        camera.setParameters(param);
+        camera.startPreview();
         loadShaders();
     }
 
     @Override
-    public void onSurfaceChanged ( GL10 unused, int width, int height ) {
-        GLES20.glViewport( 0, 0, width, height );
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
         Camera.Size previewSize = camera.getParameters().getPreviewSize();
         Camera.Parameters param = camera.getParameters();
         param.setPictureSize(previewSize.width, previewSize.height);
@@ -123,11 +127,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
     }
 
     @Override
-    public void onDrawFrame ( GL10 unused ) {
+    public void onDrawFrame(GL10 unused){
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        synchronized(this) {
-            if (updateSurfaceTexture) {
+        synchronized(this){
+            if(updateSurfaceTexture){
                 surfaceTexture.updateTexImage();
                 updateSurfaceTexture = false;
             }
@@ -143,18 +147,19 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle);
         GLES20.glUniform1i(textureHandle, 0);
 
-        GLES20.glVertexAttribPointer(positionHandle, 2, GLES20.GL_FLOAT, false, 4 * 2, vertexBuffer);
-        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 4 * 2, textureBuffer);
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
         GLES20.glEnableVertexAttribArray(positionHandle);
         GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+        //GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glDisableVertexAttribArray(positionHandle);
         GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
     }
 
     @Override
-    public synchronized void onFrameAvailable ( SurfaceTexture st ) {
+    public synchronized void onFrameAvailable(SurfaceTexture st){
         updateSurfaceTexture = true;
         glCamView.requestRender();
     }
@@ -190,23 +195,21 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
             Log.d("Shader loading error: ", e.getMessage());
             return;
         }
-        IntBuffer intBuf=ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
+        int[] status = new int[1];
 
         vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vertexShaderHandle, vertexShaderCode);
         GLES20.glCompileShader(vertexShaderHandle);
-        GLES20.glGetProgramiv(vertexShaderHandle, GLES20.GL_COMPILE_STATUS, intBuf);
-        if(intBuf.get(0)==0){
-            GLES20.glGetShaderiv(vertexShaderHandle, GLES20.GL_INFO_LOG_LENGTH,intBuf);
+        GLES20.glGetProgramiv(vertexShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
+        if(status[0] == GLES20.GL_FALSE){
             Log.d("Shader","Vertex Shader: " + GLES20.glGetShaderInfoLog(vertexShaderHandle));
         }
 
         fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fragmentShaderHandle, fragmentShaderCode);
         GLES20.glCompileShader(fragmentShaderHandle);
-        GLES20.glGetProgramiv(fragmentShaderHandle, GLES20.GL_COMPILE_STATUS, intBuf);
-        if(intBuf.get(0)==0){
-            GLES20.glGetShaderiv(fragmentShaderHandle, GLES20.GL_INFO_LOG_LENGTH,intBuf);
+        GLES20.glGetProgramiv(fragmentShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
+        if(status[0] == GLES20.GL_FALSE){
             Log.d("Shader","Fragment Shader: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
         }
 
@@ -215,7 +218,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         GLES20.glAttachShader(shaderProgram, fragmentShaderHandle);
         GLES20.glLinkProgram(shaderProgram);
 
-        int[] status = new int[1];
         GLES20.glGetProgramiv(shaderProgram, GLES20.GL_LINK_STATUS, status, 0);
         if (status[0] != GLES20.GL_TRUE) {
             String error = GLES20.glGetProgramInfoLog(shaderProgram);
