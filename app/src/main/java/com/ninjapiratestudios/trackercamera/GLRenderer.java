@@ -88,7 +88,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
     @Override
     public void onSurfaceCreated ( GL10 unused, EGLConfig config ) {
         textureHandle = new int[1];
-        GLES20.glGenTextures (1, textureHandle, 0);
+        GLES20.glGenTextures(1, textureHandle, 0);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
@@ -96,7 +96,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
         surfaceTexture = new SurfaceTexture(textureHandle[0]);
         surfaceTexture.setOnFrameAvailableListener(this);
-
+        loadShaders();
         camera = Camera.open();
         try {
             camera.setPreviewTexture(surfaceTexture);
@@ -105,14 +105,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         }
 
         GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-        GLES20.glViewport(0, 0, glCamView.getWidth(), glCamView.getHeight());
-        Camera.Size previewSize = camera.getParameters().getPreviewSize();
-        Camera.Parameters param = camera.getParameters();
-        param.setPictureSize(previewSize.width, previewSize.height);
-        param.set("orientation", "landscape");
-        camera.setParameters(param);
-        camera.startPreview();
-        loadShaders();
+
     }
 
     @Override
@@ -140,16 +133,16 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         GLES20.glUseProgram(shaderProgram);
 
         int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "position");
-        int textureCoordinateHandle = GLES20.glGetAttribLocation (shaderProgram, "inputTextureCoordinate");
-        int textureHandleUI = GLES20.glGetUniformLocation (shaderProgram, "videoFrame");
+        int textureCoordinateHandle = GLES20.glGetAttribLocation(shaderProgram, "inputTextureCoordinate");
+        int textureHandleUI = GLES20.glGetUniformLocation(shaderProgram, "videoFrame");
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandleUI);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
         GLES20.glUniform1i(textureHandleUI, 0);
 
+        GLES20.glEnableVertexAttribArray(positionHandle);
         GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
         GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
-        GLES20.glEnableVertexAttribArray(positionHandle);
         GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
 
         //GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
@@ -225,7 +218,4 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         }
     }
 
-    /*private void loadShaders(){
-
-    }*/
 }
