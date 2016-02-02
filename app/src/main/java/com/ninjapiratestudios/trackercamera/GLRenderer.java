@@ -41,10 +41,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
             1.0f, -1.0f, 0.0f,
             -1.0f,  1.0f, 0.0f,
             1.0f,  1.0f, 0.0f};
-    private float texCoords[] = { 0.0f, 1.0f,
-            1.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f};
+    private float texCoords[] = { 1.0f, 1.0f,
+            1.0f, 0.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f};
 
     //handles
     int[] textureHandle = new int[1];
@@ -141,11 +141,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
 
         int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "position");
         int textureCoordinateHandle = GLES20.glGetAttribLocation (shaderProgram, "inputTextureCoordinate");
-        int textureHandle = GLES20.glGetUniformLocation (shaderProgram, "videoFrame");
+        int textureHandleUI = GLES20.glGetUniformLocation (shaderProgram, "videoFrame");
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle);
-        GLES20.glUniform1i(textureHandle, 0);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandleUI);
+        GLES20.glUniform1i(textureHandleUI, 0);
 
         GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
         GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
