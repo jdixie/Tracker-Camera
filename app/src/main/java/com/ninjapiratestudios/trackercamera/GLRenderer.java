@@ -41,10 +41,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
             1.0f, -1.0f, 0.0f,
             -1.0f,  1.0f, 0.0f,
             1.0f,  1.0f, 0.0f};
-    private float texCoords[] = { 1.0f, 1.0f,
+    private float texCoords[] = { 0.0f, 0.0f,
             1.0f, 0.0f,
             0.0f, 1.0f,
-            0.0f, 0.0f};
+            1.0f, 1.0f};
 
     //handles
     int[] textureHandle = new int[1];
@@ -96,7 +96,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
         surfaceTexture = new SurfaceTexture(textureHandle[0]);
         surfaceTexture.setOnFrameAvailableListener(this);
-        loadShaders();
+
         camera = Camera.open();
         try {
             camera.setPreviewTexture(surfaceTexture);
@@ -105,7 +105,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         }
 
         GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-
+        GLES20.glDisable(GLES20.GL_CULL_FACE);
+        GLES20.glDisable(GLES20.GL_BLEND);
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        loadShaders();
     }
 
     @Override
@@ -121,39 +124,48 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
 
     @Override
     public void onDrawFrame(GL10 unused){
+        float[] textureMatrix = new float[16];
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        synchronized(this){
+        /*synchronized(this){
             if(updateSurfaceTexture){
                 surfaceTexture.updateTexImage();
                 updateSurfaceTexture = false;
             }
-        }
+        }*/
+        surfaceTexture.updateTexImage();
+        surfaceTexture.getTransformMatrix(textureMatrix);
 
         GLES20.glUseProgram(shaderProgram);
 
         int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "position");
         int textureCoordinateHandle = GLES20.glGetAttribLocation(shaderProgram, "inputTextureCoordinate");
+        int textureMatrixHandle = GLES20.glGetUniformLocation(shaderProgram, "textureMatrix");
         int textureHandleUI = GLES20.glGetUniformLocation(shaderProgram, "videoFrame");
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
         GLES20.glUniform1i(textureHandleUI, 0);
 
+        GLES20.glUniformMatrix4fv(textureMatrixHandle, 1, false, textureMatrix, 0);
+
         GLES20.glEnableVertexAttribArray(positionHandle);
         GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
-        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
         GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
 
-        //GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+        //GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glDisableVertexAttribArray(positionHandle);
         GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+        GLES20.glUseProgram(0);
     }
 
     @Override
     public synchronized void onFrameAvailable(SurfaceTexture st){
-        updateSurfaceTexture = true;
+        //updateSurfaceTexture = true;
         glCamView.requestRender();
     }
 
@@ -193,7 +205,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vertexShaderHandle, vertexShaderCode);
         GLES20.glCompileShader(vertexShaderHandle);
-        GLES20.glGetProgramiv(vertexShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
+        GLES20.glGetShaderiv(vertexShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
         if(status[0] == GLES20.GL_FALSE){
             Log.d("Shader","Vertex Shader: " + GLES20.glGetShaderInfoLog(vertexShaderHandle));
         }
@@ -201,7 +213,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFram
         fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fragmentShaderHandle, fragmentShaderCode);
         GLES20.glCompileShader(fragmentShaderHandle);
-        GLES20.glGetProgramiv(fragmentShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
+        GLES20.glGetShaderiv(fragmentShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
         if(status[0] == GLES20.GL_FALSE){
             Log.d("Shader","Fragment Shader: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
         }

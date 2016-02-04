@@ -64,6 +64,7 @@ public class VideoActivity extends AppCompatActivity{ // implements TextureView.
         overlay = new Overlay(this);
         preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(glCamView);
+        //setContentView(glCamView);
         //mediaRecorder = new MediaRecorder();
         //mediaRecorder.setCamera(camera);
         //mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
