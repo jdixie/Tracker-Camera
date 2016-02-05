@@ -1,8 +1,9 @@
+#extension GL_OES_EGL_image_external : require
 varying highp vec2 textureCoordinate;
 
-uniform sampler2D videoFrame;
+uniform samplerExternalOES videoFrame;
 
 void main()
 {
-	gl_FragColor = vec4(1.0, 1.0, 0.0, 0.0); //texture2D(videoFrame, textureCoordinate);
+	gl_FragColor = texture2D(videoFrame, textureCoordinate);
 }
