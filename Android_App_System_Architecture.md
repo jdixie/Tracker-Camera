@@ -7,7 +7,7 @@
 	<tr> <td>Actor(S)(s)</td> <td>Tennis Coach, Tennis player, General User</td> </tr>
 	<tr>
 		<td>Brief description</td>
-		<td>The system shall check to see if it is connected to the Rasberry Pi. If it is connected to the Raberry Pi, the system shall continue to the main menu. If not, the system shall present to the user an error menu with the sole option to exit the app.</td>
+		<td>The system shall check to see if it is connected to the Rasberry Pi. If it is connected to the Rasberry Pi, the system shall continue to the main menu. If not, the system shall present to the user an error menu with the sole option to exit the app.</td>
 	</tr>
 	<tr> <td>Trigger</td> <td>The user starts the app.</td> </tr>
 	<tr>
