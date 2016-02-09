@@ -92,7 +92,7 @@
 						<li> The user navigates to their desired location in the file storage 	system.</li>
 					</ol>
 				</li>
-				<li> The user proceeds to <i>Flow of events: step 3.<i></li>
+				<li> The user proceeds to <i>Flow of events: step 3.</i></li>
 			</ol>
 			<li> <u> The video fails to record<u></li>
 			<ol type = "1">
