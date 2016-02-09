@@ -1,8 +1,9 @@
+#extension GL_OES_EGL_image_external : require
 varying mediump vec2 textureCoordinate;
 precision mediump float;
 
 
-uniform sampler2D videoFrame;
+uniform samplerExternalOES videoFrame;
 uniform vec4 inputColor;
 uniform float threshold;
 

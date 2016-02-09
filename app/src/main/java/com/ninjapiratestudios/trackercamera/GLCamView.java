@@ -9,6 +9,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 import java.io.BufferedReader;
@@ -29,14 +30,33 @@ import javax.microedition.khronos.opengles.GL10;
 public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAvailableListener {
 
     GLRenderer renderer;
+    public static final int REGULAR_VIEW = 0;
+    public static final int TRACKING_VIEW = 1;
+    int viewType = 0;
+    int screenWidth;
+    int screenHeight;
+    float xRatio, yRatio;
+    boolean setColorChoice = false;
+    boolean updateSurfaceTexture = false;
+    boolean colorSet = false;
+    float xChoice, yChoice;
+    float[] colorSelected = new float[4];
+    float threshold = 0.2f;
 
     GLCamView(Context c){
         super(c);
         renderer = new GLRenderer(this);
         setEGLContextClientVersion(2);
+        setEGLConfigChooser(8, 8, 8, 8, 0, 0);
         setRenderer(renderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    }
+
+    //toggle tracking on and off
+    public void setViewType(int vt){
+        if(colorSet && vt == TRACKING_VIEW)
+            viewType = vt;
     }
 
     @Override
@@ -53,12 +73,30 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h){
         super.surfaceChanged(holder, format, w, h);
+        screenWidth = w;
+        screenHeight = h;
     }
 
     @Override
     public synchronized void onFrameAvailable(SurfaceTexture st){
-        //updateSurfaceTexture = true;
+        updateSurfaceTexture = true;
         requestRender();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent e){
+        if(e.getAction() == MotionEvent.ACTION_UP && setColorChoice == false){
+            //x, y are in terms of width x height of the screen with 0,0 the top left
+            float x = e.getX();
+            float y = e.getY();
+
+            System.out.println("Touch at: " + x + ". " + y);
+            xChoice = x;
+            yChoice = y;
+            setColorChoice = true;
+        }
+
+        return true;
     }
 
     public class GLRenderer implements GLSurfaceView.Renderer {
@@ -66,6 +104,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
         GLCamView glCamView;
         Camera camera;
         private SurfaceTexture surfaceTexture;
+        Camera.Size previewSize;
 
         float[] transformMatrix;
         float[] viewMatrix;
@@ -88,9 +127,12 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
         int[] textureHandle = new int[1];
         private int vertexShaderHandle;
         private int fragmentShaderHandle;
-        private int shaderProgram;
+        private int regularViewShaderProgram;
+        private int positionVertexShaderHandle;
+        private int positionFragmentShaderHandle;
+        private int trackingViewShaderProgram;
 
-        boolean updateSurfaceTexture;
+        private int[] trackColor = new int[4];
 
         GLRenderer(GLCamView glcv){
             glCamView = glcv;
@@ -189,12 +231,14 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             projectionMatrix = new float[16];
             Matrix.frustumM(projectionMatrix, 0, left, right, bottom, top, near, far);
 
-            Camera.Size previewSize = camera.getParameters().getPreviewSize();
+            previewSize = camera.getParameters().getPreviewSize();
             Camera.Parameters param = camera.getParameters();
             param.setPictureSize(previewSize.width, previewSize.height);
             param.set("orientation", "landscape");
             camera.setParameters(param);
             camera.startPreview();
+            xRatio = previewSize.width / screenWidth;
+            yRatio = previewSize.height / screenHeight;
         }
 
         @Override
@@ -209,46 +253,156 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
 
             Matrix.multiplyMM(transformMatrix, 0, viewMatrix, 0, modelMatrix, 0);
             Matrix.multiplyMM(transformMatrix, 0, projectionMatrix, 0, transformMatrix, 0);
-        /*synchronized(this){
+        synchronized(this){
             if(updateSurfaceTexture){
                 surfaceTexture.updateTexImage();
                 updateSurfaceTexture = false;
             }
-        }*/
+        }
 
             surfaceTexture.updateTexImage();
             surfaceTexture.getTransformMatrix(textureMatrix);
 
-            GLES20.glUseProgram(shaderProgram);
+            if(viewType == REGULAR_VIEW || setColorChoice){
+                GLES20.glUseProgram(regularViewShaderProgram);
 
-            int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "position");
-            int textureCoordinateHandle = GLES20.glGetAttribLocation(shaderProgram, "inputTextureCoordinate");
-            int textureMatrixHandle = GLES20.glGetUniformLocation(shaderProgram, "textureMatrix");
-            int transformMatrixHandle = GLES20.glGetUniformLocation(shaderProgram, "MVPMatrix");
-            int textureHandleUI = GLES20.glGetUniformLocation(shaderProgram, "videoFrame");
+                int positionHandle = GLES20.glGetAttribLocation(regularViewShaderProgram, "position");
+                int textureCoordinateHandle = GLES20.glGetAttribLocation(regularViewShaderProgram, "inputTextureCoordinate");
+                int textureMatrixHandle = GLES20.glGetUniformLocation(regularViewShaderProgram, "textureMatrix");
+                int transformMatrixHandle = GLES20.glGetUniformLocation(regularViewShaderProgram, "MVPMatrix");
+                int textureHandleUI = GLES20.glGetUniformLocation(regularViewShaderProgram, "videoFrame");
 
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
-            GLES20.glUniform1i(textureHandleUI, 0);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
+                GLES20.glUniform1i(textureHandleUI, 0);
 
-            GLES20.glUniformMatrix4fv(textureMatrixHandle, 1, false, textureMatrix, 0);
-            GLES20.glUniformMatrix4fv(transformMatrixHandle, 1, false, transformMatrix, 0);
+                GLES20.glUniformMatrix4fv(textureMatrixHandle, 1, false, textureMatrix, 0);
+                GLES20.glUniformMatrix4fv(transformMatrixHandle, 1, false, transformMatrix, 0);
 
-            vertexBuffer.position(0);
-            GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
-            GLES20.glEnableVertexAttribArray(positionHandle);
+                vertexBuffer.position(0);
+                GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+                GLES20.glEnableVertexAttribArray(positionHandle);
 
-            textureBuffer.position(0);
-            GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
-            GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+                textureBuffer.position(0);
+                GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
+                GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
 
-            indexBuffer.position(0);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
-            //GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-            GLES20.glDisableVertexAttribArray(positionHandle);
-            GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
-            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
-            GLES20.glUseProgram(0);
+                indexBuffer.position(0);
+                GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+                GLES20.glDisableVertexAttribArray(positionHandle);
+                GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
+                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+                GLES20.glUseProgram(0);
+            }
+            else{//tracking view for now
+                GLES20.glUseProgram(trackingViewShaderProgram);
+
+                int positionHandle = GLES20.glGetAttribLocation(trackingViewShaderProgram, "position");
+                int textureCoordinateHandle = GLES20.glGetAttribLocation(trackingViewShaderProgram, "inputTextureCoordinate");
+                int textureMatrixHandle = GLES20.glGetUniformLocation(trackingViewShaderProgram, "textureMatrix");
+                int textureHandleUI = GLES20.glGetUniformLocation(trackingViewShaderProgram, "videoFrame");
+                int inputColorHandle = GLES20.glGetUniformLocation(trackingViewShaderProgram, "inputColor");
+                int thresholdHandle = GLES20.glGetUniformLocation(trackingViewShaderProgram, "threshold");
+
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
+                GLES20.glUniform1i(textureHandleUI, 0);
+
+                GLES20.glUniform4f(inputColorHandle, colorSelected[0], colorSelected[1], colorSelected[2], colorSelected[3]);
+                GLES20.glUniform1f(thresholdHandle, threshold);
+
+                GLES20.glUniformMatrix4fv(textureMatrixHandle, 1, false, textureMatrix, 0);
+
+                vertexBuffer.position(0);
+                GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+                GLES20.glEnableVertexAttribArray(positionHandle);
+
+                textureBuffer.position(0);
+                GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
+                GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+
+                indexBuffer.position(0);
+                GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+                GLES20.glDisableVertexAttribArray(positionHandle);
+                GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
+                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+                GLES20.glUseProgram(0);
+            }
+
+            /*switch(viewType){
+                case TRACKING_VIEW:{
+                    GLES20.glUseProgram(trackingViewShaderProgram);
+
+                    int positionHandle = GLES20.glGetAttribLocation(trackingViewShaderProgram, "position");
+                    int textureCoordinateHandle = GLES20.glGetAttribLocation(trackingViewShaderProgram, "inputTextureCoordinate");
+                    int textureMatrixHandle = GLES20.glGetUniformLocation(trackingViewShaderProgram, "textureMatrix");
+                    int textureHandleUI = GLES20.glGetUniformLocation(trackingViewShaderProgram, "videoFrame");
+                    int inputColorHandle = GLES20.glGetUniformLocation(trackingViewShaderProgram, "inputColor");
+                    int thresholdHandle = GLES20.glGetUniformLocation(trackingViewShaderProgram, "threshold");
+
+                    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                    GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
+                    GLES20.glUniform1i(textureHandleUI, 0);
+
+                    GLES20.glUniform4f(inputColorHandle, colorSelected[0], colorSelected[1], colorSelected[2], colorSelected[3]);
+                    GLES20.glUniform1f(thresholdHandle, threshold);
+
+                    GLES20.glUniformMatrix4fv(textureMatrixHandle, 1, false, textureMatrix, 0);
+
+                    vertexBuffer.position(0);
+                    GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+                    GLES20.glEnableVertexAttribArray(positionHandle);
+
+                    textureBuffer.position(0);
+                    GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
+                    GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+
+                    indexBuffer.position(0);
+                    GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+                    GLES20.glDisableVertexAttribArray(positionHandle);
+                    GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
+                    GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+                    GLES20.glUseProgram(0);
+                    break;
+                }
+                case REGULAR_VIEW:
+                default:{
+                    GLES20.glUseProgram(regularViewShaderProgram);
+
+                    int positionHandle = GLES20.glGetAttribLocation(regularViewShaderProgram, "position");
+                    int textureCoordinateHandle = GLES20.glGetAttribLocation(regularViewShaderProgram, "inputTextureCoordinate");
+                    int textureMatrixHandle = GLES20.glGetUniformLocation(regularViewShaderProgram, "textureMatrix");
+                    int transformMatrixHandle = GLES20.glGetUniformLocation(regularViewShaderProgram, "MVPMatrix");
+                    int textureHandleUI = GLES20.glGetUniformLocation(regularViewShaderProgram, "videoFrame");
+
+                    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                    GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureHandle[0]);
+                    GLES20.glUniform1i(textureHandleUI, 0);
+
+                    GLES20.glUniformMatrix4fv(textureMatrixHandle, 1, false, textureMatrix, 0);
+                    GLES20.glUniformMatrix4fv(transformMatrixHandle, 1, false, transformMatrix, 0);
+
+                    vertexBuffer.position(0);
+                    GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+                    GLES20.glEnableVertexAttribArray(positionHandle);
+
+                    textureBuffer.position(0);
+                    GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
+                    GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+
+                    indexBuffer.position(0);
+                    GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+                    GLES20.glDisableVertexAttribArray(positionHandle);
+                    GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
+                    GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+                    GLES20.glUseProgram(0);
+                }
+            }*/
+
+            if(setColorChoice){
+                setColor();
+            }
+
         }
 
         private void loadShaders(){
@@ -256,6 +410,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             String vertexShaderCode = "";
             String fragmentShaderCode = "";
 
+            //load regular shader program
             try {
                 InputStream fis = assetManager.open("DirectDisplayShader.fsh");
                 InputStreamReader fisr = new InputStreamReader(fis);
@@ -300,16 +455,94 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
                 Log.d("Shader","Fragment Shader: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
             }
 
-            shaderProgram = GLES20.glCreateProgram();
-            GLES20.glAttachShader(shaderProgram, vertexShaderHandle);
-            GLES20.glAttachShader(shaderProgram, fragmentShaderHandle);
-            GLES20.glLinkProgram(shaderProgram);
+            regularViewShaderProgram = GLES20.glCreateProgram();
+            GLES20.glAttachShader(regularViewShaderProgram, vertexShaderHandle);
+            GLES20.glAttachShader(regularViewShaderProgram, fragmentShaderHandle);
+            GLES20.glLinkProgram(regularViewShaderProgram);
 
-            GLES20.glGetProgramiv(shaderProgram, GLES20.GL_LINK_STATUS, status, 0);
+            GLES20.glGetProgramiv(regularViewShaderProgram, GLES20.GL_LINK_STATUS, status, 0);
             if (status[0] != GLES20.GL_TRUE) {
-                String error = GLES20.glGetProgramInfoLog(shaderProgram);
+                String error = GLES20.glGetProgramInfoLog(regularViewShaderProgram);
                 //throw new RuntimeException("Shader program compilation failure: " + error);
             }
+
+            //load tracking shader program
+            try {
+                InputStream fis = assetManager.open("ThresholdShader2.fsh");
+                InputStreamReader fisr = new InputStreamReader(fis);
+                BufferedReader fbr = new BufferedReader(fisr);
+                StringBuilder fsb = new StringBuilder();
+                String next;
+                while((next = fbr.readLine()) != null){
+                    fsb.append(next);
+                    fsb.append('\n');
+                }
+                fragmentShaderCode = fsb.toString();
+
+                InputStream vis = assetManager.open("ThresholdShader.vsh");
+                InputStreamReader visr = new InputStreamReader(vis);
+                BufferedReader vbr = new BufferedReader(visr);
+                StringBuilder vsb = new StringBuilder();
+                while((next = vbr.readLine()) != null){
+                    vsb.append(next);
+                    vsb.append('\n');
+                }
+                vertexShaderCode = vsb.toString();
+            }
+            catch(IOException e){
+                Log.d("Shader loading error: ", e.getMessage());
+                return;
+            }
+
+            positionVertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
+            GLES20.glShaderSource(positionVertexShaderHandle, vertexShaderCode);
+            GLES20.glCompileShader(positionVertexShaderHandle);
+            GLES20.glGetShaderiv(positionVertexShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
+            if(status[0] == GLES20.GL_FALSE){
+                Log.d("Shader","Vertex Shader: " + GLES20.glGetShaderInfoLog(positionVertexShaderHandle));
+            }
+
+            positionFragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
+            GLES20.glShaderSource(positionFragmentShaderHandle, fragmentShaderCode);
+            GLES20.glCompileShader(positionFragmentShaderHandle);
+            GLES20.glGetShaderiv(positionFragmentShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
+            if(status[0] == GLES20.GL_FALSE){
+                Log.d("Shader","Fragment Shader: " + GLES20.glGetShaderInfoLog(positionFragmentShaderHandle));
+            }
+
+            trackingViewShaderProgram = GLES20.glCreateProgram();
+            GLES20.glAttachShader(trackingViewShaderProgram, positionVertexShaderHandle);
+            GLES20.glAttachShader(trackingViewShaderProgram, positionFragmentShaderHandle);
+            GLES20.glLinkProgram(trackingViewShaderProgram);
+
+            GLES20.glGetProgramiv(trackingViewShaderProgram, GLES20.GL_LINK_STATUS, status, 0);
+            if (status[0] != GLES20.GL_TRUE) {
+                String error = GLES20.glGetProgramInfoLog(trackingViewShaderProgram);
+                //throw new RuntimeException("Shader program compilation failure: " + error);
+            }
+        }
+
+        private void setColor(){
+            float colPointX = xChoice * xRatio;
+            float colPointY = yChoice * yRatio;
+            int pixel = (int)(xChoice * xRatio * yChoice * yRatio);
+            System.out.println("Cam texture: " + previewSize.width + ", " + previewSize.height);
+
+            ByteBuffer buff = ByteBuffer.allocateDirect(4);
+            buff.order(ByteOrder.nativeOrder());
+            GLES20.glReadPixels((int) xChoice, (int) yChoice, 1, 1, GL10.GL_RGBA, GL10.GL_UNSIGNED_BYTE,
+                    buff);
+            colorSelected[0] = (buff.get(0) & 0xff) / 255.0f;
+            colorSelected[1] = (buff.get(1) & 0xff) / 255.0f;
+            colorSelected[2] = (buff.get(2) & 0xff) / 255.0f;
+            colorSelected[3] = (buff.get(3) & 0xff) / 255.0f;
+            setColorChoice = false;
+            colorSet = true;
+            setViewType(TRACKING_VIEW);
+            System.out.println("Color: " + (colorSelected[0] * 255.0) + ", " + (colorSelected[1] * 255.0) + ", " +
+                    (colorSelected[2] * 255.0) + ", " + (colorSelected[3] * 255.0));
+            System.out.println("Color: " + colorSelected[0] + ", " + colorSelected[1] + ", " +
+                colorSelected[2] + ", " + colorSelected[3]);
         }
 
     }
