@@ -1,3 +1,4 @@
+#extension GL_OES_EGL_image_external : require
 varying mediump vec2 textureCoordinate;
 precision mediump float;
 

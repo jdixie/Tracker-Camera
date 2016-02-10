@@ -1,6 +1,7 @@
 package com.ninjapiratestudios.trackercamera;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
@@ -8,8 +9,6 @@ import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Environment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,7 +28,7 @@ import java.util.Date;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class VideoActivity extends AppCompatActivity{ // implements TextureView.SurfaceTextureListener{
+public class VideoActivity extends Activity { // implements TextureView.SurfaceTextureListener{
 
     Camera camera;
     //CamPreview camPreview;
@@ -48,7 +47,7 @@ public class VideoActivity extends AppCompatActivity{ // implements TextureView.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_video);
+        setContentView(R.layout.activity_full_video);
 
         //captureCamera();
         recordingActive = false;
@@ -62,9 +61,9 @@ public class VideoActivity extends AppCompatActivity{ // implements TextureView.
 
         }*/
         overlay = new Overlay(this);
-        preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(glCamView);
-        //setContentView(glCamView);
+        //preview = (FrameLayout) findViewById(R.id.camera_preview);
+        //preview.addView(glCamView);
+        setContentView(glCamView);
         //mediaRecorder = new MediaRecorder();
         //mediaRecorder.setCamera(camera);
         //mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
@@ -77,13 +76,13 @@ public class VideoActivity extends AppCompatActivity{ // implements TextureView.
         //addContentView(overlay, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 
         //buttons
-        recordButton = (Button)findViewById(R.id.button_record);
+        /*recordButton = (Button)findViewById(R.id.button_record);
         recordButton.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view){
                         recordToggle();
                     }
-                });
+                });*/
     }
 
     @Override
