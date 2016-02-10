@@ -76,6 +76,7 @@
 		<ul type="A">
 			<li>Calibration is set and stored.</li>
 			<li>Recording is started.</li>
+			<li>App actively tracks the subject.</li>
 		</ul>
 		</td>
 	</tr>
@@ -83,17 +84,46 @@
 		<td>Trigger</td> 
 		<td>
 			<ul type="A">
-				<li></li>
+				<li>Subject chosen.</li>
 			</ul>
 		</td> 
 	</tr>
 	<tr> <td>Flow of events</td> 
 		 <td>
 			<ol type="1">
-				<li></li>
+				<li>Pre-calibration chosen from menu.</li>
+				<li>User selects desired photo to retrieve a subject form.</li>
+				<li>User taps the subject desired in the selected photo.</li>
+				<li>Confirmation dialog is shown to confirm choice.</li>
+				<li>Dialog to set chosen subject as default subject presented, user responds appropriately.</li>
+				<li>Countdown to recording start initiated.</li>
+				<li>App begins to actively track subject and recording is started. Visual confirmation presented to user.</li>
 			</ol>
 		</td> 
 	</tr>
-	<tr> <td>Alternative flows and exceptions</td> <td></td> </tr>
+	<tr> <td>Alternative flow of events</td>
+		<td>
+			<ol type="1">
+				<li>Recording is started with default subject.</li>
+				<li>Countdown to recording start initiated.</li>
+				<li>App begins to actively track subject and recording is started. Visual confirmation presented to user.</li>
+			</ol>
+		</td>
+	</tr>
+	<tr> <td>Alternative flow of events 2</td>
+		<td>
+			<ol type="1">
+				<li>Recording is started with no default subject.</li>
+				<li>Countdown to analysis initiated and visual cue given to user.</li>
+				<li>App begins analyzing colors within the center ninth of the frame.</li>
+				<li>A color or colors that are present for a specified time interval within that ninth are chosen as the subject to track.</li>
+				<li>Countdown to recording start initiated.</li>
+				<li>App begins to actively track subject and recording is started. Visual confirmation presented to user.</li>
+			</ol>
+		</td>
+	</tr>
+	<tr> <td>Exceptions</td> 
+		<td>If a subject is not detected at the end of the countdown to recording start, the recording will not be started an error visual cue will be presented to the user.</td>
+	</tr>
 	<tr> <td>Trigger</td> <td></td> </tr>
 </table>
