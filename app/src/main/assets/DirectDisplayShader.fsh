@@ -1,6 +1,7 @@
+#extension GL_OES_EGL_image_external : require
 varying highp vec2 textureCoordinate;
 
-uniform sampler2D videoFrame;
+uniform samplerExternalOES videoFrame;
 
 void main()
 {
