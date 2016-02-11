@@ -11,7 +11,7 @@
 * Joshua Dixie
 
 ### Description
-Android application that tracks a desired tennis player while communicating with the Rasberry Pi for device rotation.
+Android application that tracks a desired tennis player while communicating with a Rasberry Pi for device rotation.
 
 ## System Architecture
 ### Model View Controller
@@ -21,15 +21,22 @@ The system follows a Model View Controller (MVC) Design Architecture. The MVC ar
 
 **Model**
 
-* TODO
+* Video file storage.
+* User preferences.
+* XML containing application resources
+	* strings.xml, dimen.xml, etc. 
 
 **VIEW**
 
-* TODO
+* Activities and Fragments.
+* Android Views.
+* XML describing the layout of the Views.
 
 **Controller** 
 
-* TODO
+* Activities and Fragments
+	* Part of View and Controller component because they handle application life cycle events (Controller), and display the UI (View).
+* Java classes that handle business logic of application.
 
 ##1. Use Cases
 ###1.1 App Startup
