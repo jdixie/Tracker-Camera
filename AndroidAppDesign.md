@@ -1,7 +1,35 @@
 #Android App System Design
 
-##Design Architecture
-// Add Image
+## Overview
+
+### Version
+1.0
+
+### Devlopers
+* John Qualls
+* Ben Boudra
+* Joshua Dixie
+
+### Description
+Android application that tracks a desired tennis player while communicating with the Rasberry Pi for device rotation.
+
+## System Architecture
+### Model View Controller
+The system follows a Model View Controller (MVC) Design Architecture. The MVC architecture fits nicely with application development on the Android Platform. The following lists where Android components are relavent.
+![Your alternative text to picture here...](https://media.taiga.io/attachments/4/d/6/8/2c36d66fbca86bed7eaf96b4955dbf6aa2d0f23769af67b25d5330f2f8c9/MVCDiagram.svg "MVC Diagram")
+
+
+**Model**
+
+* TODO
+
+**VIEW**
+
+* TODO
+
+**Controller** 
+
+* TODO
 
 ##1. Use Cases
 ###1.1 App Startup
@@ -37,11 +65,57 @@
 			</ol>
 		</td>
 	</tr>
-	<tr> <td>Alternative flows and exceptions</td> <td>The user starts the app.</td> </tr>
-	<tr> <td>Trigger</td> <td>The user starts the app.</td> </tr>
+	<tr> <td>Alternative flows and exceptions</td> 
+		<td>**Alternate Flow A - The system detects that it is not paired with any bluetooth stand:**
+		<ol>
+			<li>The system detects that it is not paired with any bluetooth stand.</li>
+			<li>Throw no paired device exception and exit application.</li>
+		</ol>
+		**Alternate Flow B - The System fails to connect with the paired device:**
+		<ol>
+			<li>Application failed to initiate a connection with the paired stand.</li>
+			<li>Throw failed connection exception and exit application.</li>
+		</ol>
+		</td>
+	</tr>
+	<tr> <td>Priority</td> <td>1</td> </tr>
+	<tr> <td>Assumptions</td> <td>N/A</td> </tr>
+	<tr> <td>Issues</td> <td>N/A</td> </tr>
 </table>
 
 ### 1.2 Camera Fragment
+<table> 
+	<tr> <td>Use case name</td> <td>Camera Fragment</td></tr>
+	<tr> <td>Use case ID</td> <td>UC-2</td> </tr>
+	<tr> <td>Superordinate use case(s)</td> <td>N/A</td> </tr>
+	<tr> <td>Actor(S)(s)</td> <td>The system or the user of the system.</td> </tr>
+	<tr> 
+		<td>Brief description</td> 
+		<td>The user shall select the operation that they wish to perform.</td> 
+	</tr>
+		<td>Trigger</td> 
+		<td>
+			The application reaches the Camera Fragment.
+		</td> 
+	<tr> 
+		<td>Preconditions</td> 
+		<td>The application should have initiated a successful Bluetooth connection to the stand.</td> 
+	</tr>
+	<tr> <td>Post-conditions</td> <td>See post-condition of appropriate flow of event.</td> </tr>
+	<tr> <td>Flow of events</td> 
+		 <td>
+			See use case 1.3.
+		</td> 
+	</tr>
+	<tr> <td>Alternative flows and exceptions</td> 
+		<td>**Alternate Flow A - UC-3 Recording/Storing**
+		**Alternate Flow B - UC-5 Editing/Sharing**
+		</td>
+	</tr>
+	<tr> <td>Priority</td> <td>1</td> </tr>
+	<tr> <td>Assumptions</td> <td>N/A</td> </tr>
+	<tr> <td>Issues</td> <td>N/A</td> </tr>
+</table>
 
 ### 1.3 Recording/Storing
 
@@ -192,6 +266,7 @@
 	<tr><td>Issues</td> <td>N/A</td> </tr>
 </table>
 ### 1.5 Editing/Sharing
+TODO
 
 ### 1.6 Tracking Calibration
 <table> 
