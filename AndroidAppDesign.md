@@ -6,17 +6,18 @@
 1.0
 
 ### Devlopers
+* Jalen Halverson
 * John Qualls
 * Ben Boudra
 * Joshua Dixie
 
 ### Description
-Android application that tracks a desired tennis player while communicating with a Rasberry Pi for device rotation.
+Android application that tracks a specific tennis player while communicating with a Rasberry Pi for device rotation.
 
 ## System Architecture
 ### Model View Controller
-The system follows a Model View Controller (MVC) Design Architecture. The MVC architecture fits nicely with application development on the Android Platform. The following lists where Android components are relavent.
-![Your alternative text to picture here...](https://media.taiga.io/attachments/4/d/6/8/2c36d66fbca86bed7eaf96b4955dbf6aa2d0f23769af67b25d5330f2f8c9/MVCDiagram.svg "MVC Diagram")
+The system follows a Model View Controller (MVC) Design Architecture. The MVC architecture fits nicely with the application development framework on the Android Platform. The following lists where Android components are relevant.
+![MVC Diagram](https://media.taiga.io/attachments/1/d/e/7/a6c47173d603a9b6db394ebf0676e6e95d4c71ce2126a73b44b6a07f4870/MVCDiagram.png "MVC Diagram")
 
 
 **Model**
@@ -36,7 +37,7 @@ The system follows a Model View Controller (MVC) Design Architecture. The MVC ar
 
 * Activities and Fragments
 	* Part of View and Controller component because they handle application life cycle events (Controller), and display the UI (View).
-* Java classes that handle business logic of application.
+* Java classes that handle business logic of the application.
 
 ##1. Use Cases
 ###1.1 App Startup
@@ -57,11 +58,6 @@ The system follows a Model View Controller (MVC) Design Architecture. The MVC ar
 	<tr> <td>Post-conditions</td> <td>The user starts the app.</td> </tr>
 	<tr>
 		<td>Trigger</td>
-		<td>
-			<ol type="A">
-				<li>The application should navigate to the main system screen or should have exited the application.</li>
-			</ol>
-		</td>
 	</tr>
 	<tr> <td>Flow of events</td>
 		 <td>
