@@ -6,6 +6,7 @@ import android.media.MediaRecorder;
 /**
  * This class will be used to provide an object that will handle all
  * of the functions associated with the device's video camera.
+ *
  * @author John Qualls
  * @version 2/27/2016
  */
