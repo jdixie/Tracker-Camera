@@ -108,7 +108,7 @@ public class VideoActivity extends Activity { // implements TextureView.SurfaceT
         }
     }
 
-    private void recordToggle(){
+    private void recordToggle() {
         //not working - fix later
         /*if(!recordingActive) {
             //the following line can be adjusted once we have implemented video quality options in a stored config

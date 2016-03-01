@@ -43,7 +43,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
     float[] colorSelected = new float[4];
     float threshold = 0.2f;
 
-    GLCamView(Context c){
+    GLCamView(Context c) {
         super(c);
         renderer = new GLRenderer(this);
         setEGLContextClientVersion(2);
@@ -54,38 +54,38 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
     }
 
     //toggle tracking on and off
-    public void setViewType(int vt){
-        if(colorSet && vt == TRACKING_VIEW)
+    public void setViewType(int vt) {
+        if (colorSet && vt == TRACKING_VIEW)
             viewType = vt;
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder){
+    public void surfaceCreated(SurfaceHolder holder) {
         super.surfaceCreated(holder);
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder){
+    public void surfaceDestroyed(SurfaceHolder holder) {
         renderer.release();
         super.surfaceDestroyed(holder);
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h){
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
         screenWidth = w;
         screenHeight = h;
     }
 
     @Override
-    public synchronized void onFrameAvailable(SurfaceTexture st){
+    public synchronized void onFrameAvailable(SurfaceTexture st) {
         updateSurfaceTexture = true;
         requestRender();
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent e){
-        if(e.getAction() == MotionEvent.ACTION_UP && setColorChoice == false){
+    public boolean onTouchEvent(MotionEvent e) {
+        if (e.getAction() == MotionEvent.ACTION_UP && setColorChoice == false) {
             //x, y are in terms of width x height of the screen with 0,0 the top left
             float x = e.getX();
             float y = e.getY();
@@ -110,15 +110,15 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
         float[] viewMatrix;
         float[] projectionMatrix;
 
-        private short indices[] = { 0, 1, 2, 2, 1, 3 };
+        private short indices[] = {0, 1, 2, 2, 1, 3};
         private ShortBuffer indexBuffer;
         private FloatBuffer vertexBuffer;
         private FloatBuffer textureBuffer;
-        private float rectCoords[] = { -1.0f, -1.0f, 0.0f,
+        private float rectCoords[] = {-1.0f, -1.0f, 0.0f,
                 1.0f, -1.0f, 0.0f,
-                -1.0f,  1.0f, 0.0f,
-                1.0f,  1.0f, 0.0f};
-        private float texCoords[] = { 0.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f};
+        private float texCoords[] = {0.0f, 0.0f,
                 1.0f, 0.0f,
                 0.0f, 1.0f,
                 1.0f, 1.0f};
@@ -134,11 +134,11 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
 
         private int[] trackColor = new int[4];
 
-        GLRenderer(GLCamView glcv){
+        GLRenderer(GLCamView glcv) {
             glCamView = glcv;
 
             //ready index, vertex, and texture buffers
-            ByteBuffer ib = ByteBuffer.allocateDirect(indices. length * 2);
+            ByteBuffer ib = ByteBuffer.allocateDirect(indices.length * 2);
             ib.order(ByteOrder.nativeOrder());
             indexBuffer = ib.asShortBuffer();
             indexBuffer.put(indices);
@@ -159,14 +159,14 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             textureBuffer.position(0);
         }
 
-        public void release(){
+        public void release() {
             surfaceTexture.release();
             camera.stopPreview();
             GLES20.glDeleteTextures(1, textureHandle, 0);
         }
 
         @Override
-        public void onSurfaceCreated ( GL10 unused, EGLConfig config ) {
+        public void onSurfaceCreated(GL10 unused, EGLConfig config) {
             // Position the eye behind the origin.
             final float eyeX = 0.0f;
             final float eyeY = 0.0f;
@@ -202,7 +202,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             camera = Camera.open();
             try {
                 camera.setPreviewTexture(surfaceTexture);
-            } catch(IOException e){
+            } catch (IOException e) {
                 throw new RuntimeException("Error setting camera preview to texture.");
             }
 
@@ -242,28 +242,28 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
         }
 
         @Override
-        public void onDrawFrame(GL10 unused){
+        public void onDrawFrame(GL10 unused) {
             GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
             float[] textureMatrix = new float[16];
-            float[] modelMatrix = { 1.0f, 0.0f, 0.0f, 0.0f,
-                                        0.0f, 1.0f, 0.0f, 0.0f,
-                                        0.0f, 0.0f, 1.0f, 0.0f,
-                                        0.0f, 0.0f, 0.0f, 1.0f};
+            float[] modelMatrix = {1.0f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 0.0f, 1.0f};
 
             Matrix.multiplyMM(transformMatrix, 0, viewMatrix, 0, modelMatrix, 0);
             Matrix.multiplyMM(transformMatrix, 0, projectionMatrix, 0, transformMatrix, 0);
-        synchronized(this){
-            if(updateSurfaceTexture){
-                surfaceTexture.updateTexImage();
-                updateSurfaceTexture = false;
+            synchronized (this) {
+                if (updateSurfaceTexture) {
+                    surfaceTexture.updateTexImage();
+                    updateSurfaceTexture = false;
+                }
             }
-        }
 
             surfaceTexture.updateTexImage();
             surfaceTexture.getTransformMatrix(textureMatrix);
 
-            if(viewType == REGULAR_VIEW || setColorChoice){
+            if (viewType == REGULAR_VIEW || setColorChoice) {
                 GLES20.glUseProgram(regularViewShaderProgram);
 
                 int positionHandle = GLES20.glGetAttribLocation(regularViewShaderProgram, "position");
@@ -293,8 +293,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
                 GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
                 GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
                 GLES20.glUseProgram(0);
-            }
-            else{//tracking view for now
+            } else {//tracking view for now
                 GLES20.glUseProgram(trackingViewShaderProgram);
 
                 int positionHandle = GLES20.glGetAttribLocation(trackingViewShaderProgram, "position");
@@ -399,13 +398,13 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
                 }
             }*/
 
-            if(setColorChoice){
+            if (setColorChoice) {
                 setColor();
             }
 
         }
 
-        private void loadShaders(){
+        private void loadShaders() {
             AssetManager assetManager = glCamView.getContext().getAssets();
             String vertexShaderCode = "";
             String fragmentShaderCode = "";
@@ -417,7 +416,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
                 BufferedReader fbr = new BufferedReader(fisr);
                 StringBuilder fsb = new StringBuilder();
                 String next;
-                while((next = fbr.readLine()) != null){
+                while ((next = fbr.readLine()) != null) {
                     fsb.append(next);
                     fsb.append('\n');
                 }
@@ -427,13 +426,12 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
                 InputStreamReader visr = new InputStreamReader(vis);
                 BufferedReader vbr = new BufferedReader(visr);
                 StringBuilder vsb = new StringBuilder();
-                while((next = vbr.readLine()) != null){
+                while ((next = vbr.readLine()) != null) {
                     vsb.append(next);
                     vsb.append('\n');
                 }
                 vertexShaderCode = vsb.toString();
-            }
-            catch(IOException e){
+            } catch (IOException e) {
                 Log.d("Shader loading error: ", e.getMessage());
                 return;
             }
@@ -443,16 +441,16 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             GLES20.glShaderSource(vertexShaderHandle, vertexShaderCode);
             GLES20.glCompileShader(vertexShaderHandle);
             GLES20.glGetShaderiv(vertexShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
-            if(status[0] == GLES20.GL_FALSE){
-                Log.d("Shader","Vertex Shader: " + GLES20.glGetShaderInfoLog(vertexShaderHandle));
+            if (status[0] == GLES20.GL_FALSE) {
+                Log.d("Shader", "Vertex Shader: " + GLES20.glGetShaderInfoLog(vertexShaderHandle));
             }
 
             fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
             GLES20.glShaderSource(fragmentShaderHandle, fragmentShaderCode);
             GLES20.glCompileShader(fragmentShaderHandle);
             GLES20.glGetShaderiv(fragmentShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
-            if(status[0] == GLES20.GL_FALSE){
-                Log.d("Shader","Fragment Shader: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
+            if (status[0] == GLES20.GL_FALSE) {
+                Log.d("Shader", "Fragment Shader: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
             }
 
             regularViewShaderProgram = GLES20.glCreateProgram();
@@ -473,7 +471,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
                 BufferedReader fbr = new BufferedReader(fisr);
                 StringBuilder fsb = new StringBuilder();
                 String next;
-                while((next = fbr.readLine()) != null){
+                while ((next = fbr.readLine()) != null) {
                     fsb.append(next);
                     fsb.append('\n');
                 }
@@ -483,13 +481,12 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
                 InputStreamReader visr = new InputStreamReader(vis);
                 BufferedReader vbr = new BufferedReader(visr);
                 StringBuilder vsb = new StringBuilder();
-                while((next = vbr.readLine()) != null){
+                while ((next = vbr.readLine()) != null) {
                     vsb.append(next);
                     vsb.append('\n');
                 }
                 vertexShaderCode = vsb.toString();
-            }
-            catch(IOException e){
+            } catch (IOException e) {
                 Log.d("Shader loading error: ", e.getMessage());
                 return;
             }
@@ -498,16 +495,16 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             GLES20.glShaderSource(positionVertexShaderHandle, vertexShaderCode);
             GLES20.glCompileShader(positionVertexShaderHandle);
             GLES20.glGetShaderiv(positionVertexShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
-            if(status[0] == GLES20.GL_FALSE){
-                Log.d("Shader","Vertex Shader: " + GLES20.glGetShaderInfoLog(positionVertexShaderHandle));
+            if (status[0] == GLES20.GL_FALSE) {
+                Log.d("Shader", "Vertex Shader: " + GLES20.glGetShaderInfoLog(positionVertexShaderHandle));
             }
 
             positionFragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
             GLES20.glShaderSource(positionFragmentShaderHandle, fragmentShaderCode);
             GLES20.glCompileShader(positionFragmentShaderHandle);
             GLES20.glGetShaderiv(positionFragmentShaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
-            if(status[0] == GLES20.GL_FALSE){
-                Log.d("Shader","Fragment Shader: " + GLES20.glGetShaderInfoLog(positionFragmentShaderHandle));
+            if (status[0] == GLES20.GL_FALSE) {
+                Log.d("Shader", "Fragment Shader: " + GLES20.glGetShaderInfoLog(positionFragmentShaderHandle));
             }
 
             trackingViewShaderProgram = GLES20.glCreateProgram();
@@ -522,10 +519,10 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             }
         }
 
-        private void setColor(){
+        private void setColor() {
             float colPointX = xChoice * xRatio;
             float colPointY = yChoice * yRatio;
-            int pixel = (int)(xChoice * xRatio * yChoice * yRatio);
+            int pixel = (int) (xChoice * xRatio * yChoice * yRatio);
             System.out.println("Cam texture: " + previewSize.width + ", " + previewSize.height);
 
             ByteBuffer buff = ByteBuffer.allocateDirect(4);
@@ -542,7 +539,7 @@ public class GLCamView extends GLSurfaceView implements SurfaceTexture.OnFrameAv
             System.out.println("Color: " + (colorSelected[0] * 255.0) + ", " + (colorSelected[1] * 255.0) + ", " +
                     (colorSelected[2] * 255.0) + ", " + (colorSelected[3] * 255.0));
             System.out.println("Color: " + colorSelected[0] + ", " + colorSelected[1] + ", " +
-                colorSelected[2] + ", " + colorSelected[3]);
+                    colorSelected[2] + ", " + colorSelected[3]);
         }
 
     }
