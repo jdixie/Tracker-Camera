@@ -24,37 +24,36 @@ Benjamin Boudra
 
 **fragment_file_system.xml** - An XML file will be needed to configure the view that will display the file system.
 
-**fragment_video_playback.xml**
+**fragment_video_playback.xml** - An XML file will specify the configuration of the video playback view.
 
 ## 3.2 Model Component
-**File Directory** - The file directory will include the Environment.DIRECTORY_DCIM and the Environment.DIRECTORY_PICTURS Directory's so that the user will have access to any video which was recorded by the application that still exists on the device or SD card.
+**File Directory** - The file directory will include the Environment.DIRECTORY_DCIM and the Environment.DIRECTORY_PICTURES Directory's so that the user will have access to any video which was recorded by the application that still exists on the device or SD card.
 
 ## 3.3 Controller Component
-**FileSystem.java** - This class will provide an object
-
-
-
-**TEMPORARY: GLCamView.java** - As mentioned in section 2. Impacted Areas.
+**FileSystem.java** - This class will provide an object that handles all the functionality used by the file system.
+**Playback.java** - This class will provide basic functionality to the video recorder fragment/activity.
 
 ## 3.4 Life Cycle Callback Handling
-### CameraFragment Life Cycle
-**onCreate()** - Initializes the CameraRecorder object.
+### File System Fragment Lifecycle
+**onCreate()** - Initializes the File System Fragment object.
 
-**onStop()** - If a video is recording, it is stopped.
+**onStop()** - Returns to the Camera fragment.
+
+### Video Playback Fragment Life Cycle
+**onCreate()** Initializes the Playback Fragment object.
+
+**onStop()** - Stops the playback and returns to the File System Fragment.
 
 ### FileNameDialog Life Cycle
 ## 3.5 Exception Handling
-**Error Saving File** - If there was an error saving the file to the designated output path, then return the user to the dialog with an error message, instructing them to try again or choose a different name.
+**Error Retrieving File** - If the file being retrieved is corrupted, The user is notified and the system will remain in the File System Fragment instead of loading the Video Playback Fragment.
 
-**Error Recording File** - If there was an error recording the file, notify the user that there was an error recording, and return them back to the CameraFragment.
+**Video Playback Error** - If an error occurs during video playback, the user is notified and the system will return to the File System Fragment.
 
 ## 4. Testing Strategy
 **Test Driven Development(TDD)** - TDD with JUnit, Mockito, and PowerMockito will be followed in order to provide high quality code and test coverage.
 
 ## 5. References
-- **Fragment Lifecycle** - [http://developer.android.com/reference/android/app/DialogFragment.html#Lifecycle](http://developer.android.com/reference/android/app/DialogFragment.html#Lifecycle)
-- **DialogFragment Blog** - [http://android-developers.blogspot.com/2012/05/using-dialogfragments.html](http://android-developers.blogspot.com/2012/05/using-dialogfragments.html)
-- **Google API Camera Guide** - [http://developer.android.com/guide/topics/media/camera.html#capture-video](http://developer.android.com/guide/topics/media/camera.html#capture-video)
-- **Google API Saving Media Files Guide** - [http://developer.android.com/guide/topics/media/camera.html#saving-media](http://developer.android.com/guide/topics/media/camera.html#saving-media)
-- **Google API Storage Options Guide** - [http://developer.android.com/guide/topics/data/data-storage.html](http://developer.android.com/guide/topics/data/data-storage.html)
-  - "Saving files that can be shared with other apps" Header.
+<ul>
+**<li> <a href = http://developer.android.com/guide/components/fragments.html> Android Developers - API Guides - Fragments</a>.</li>**
+**<li><a href = http://developer.android.com/training/basics/data-storage/index.html> Android Developers - Training - Saving Files </a></li>**
