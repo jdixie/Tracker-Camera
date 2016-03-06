@@ -1,4 +1,4 @@
-# Recording and Storing Detailed Design Document
+# Retrieving Detailed Design Document
 ## 1. Overview
 ### Description
 This component will be responsible for retrieving and playing videos. Videos must be saved to shared memory space for this component to function properly.
@@ -10,7 +10,7 @@ Benjamin Boudra
 1.0
 
 ## 2. Impacted Areas
-**System Storage** - This component will Retrieve videos from shared memory space within either internal or external shared memory.
+**System Storage** - This component will retrieve videos from shared memory space within either internal or external shared memory.
 
 **The File System Fragment** - A file navigation fragment will be provided by the component so that the user may search through the relevant memory space to find the video they wish to play.
 
@@ -32,7 +32,7 @@ Benjamin Boudra
 **onStop()** - Returns to the Camera fragment.
 
 ## 3.5 Exception Handling
-**Error Retrieving File** - If the file being retrieved is corrupted, the user is notified and the system will remain in the File System Fragment instead of loading the Video Playback Fragment.
+**Error Retrieving File** - If the file being retrieved is corrupted, the user is notified and the system will remain in the File System Fragment instead of creating the intent to view the video externally.
 
 ## 4. Testing Strategy
 **Test Driven Development(TDD)** - TDD with JUnit, Mockito, and PowerMockito will be followed in order to provide high-quality code and test coverage.
