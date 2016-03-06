@@ -41,5 +41,4 @@ Benjamin Boudra
 <ul>
 **<li> <a href = http://developer.android.com/guide/components/fragments.html> Android Developers - API Guides - Fragments</a>.</li>**
 **<li><a href = http://developer.android.com/training/basics/data-storage/index.html> Android Developers - Training - Saving Files </a></li>**
-**<li><a href =
 </ul>
