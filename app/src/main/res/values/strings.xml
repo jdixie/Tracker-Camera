@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Tracker Camera</string>
+    <string name="record_page">Recorder</string>
+    <string name="sharing">Sharing</string>
+
+    <!-- Recording and Storing -->
+    <string name="fn_dialog_title">Video File Name</string>
+    <string name="fn_dialog_file_name">Enter Video File Name to Save</string>
+    <string name="fn_dialog_record_button">Record</string>
+    <string name="fn_dialog_cancel_button">Cancel</string>
+</resources>
