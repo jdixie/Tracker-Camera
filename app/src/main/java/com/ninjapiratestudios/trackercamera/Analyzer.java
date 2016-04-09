@@ -34,18 +34,33 @@ import android.view.SurfaceView;
 
 public class Analyzer extends Thread{
     private boolean isColorSelected = false;
+    //Mat used for frame analysis
     private Mat rgba;
+
+    //selected color variables
     private Scalar blobColorRgba;
     private Scalar blobColorHsv;
+
+    //detector is the go between to OpenCV to find blobs/contours
     private ColorBlobDetector detector;
+
+    //used to show color range of selected color, and color of contour outline
+    //TODO: remove in next iteration
     private Mat spectrum;
     private Size SPECTRUM_SIZE;
     private Scalar CONTOUR_COLOR;
+
+    //used to convert android camera preview frame to OpenCV usable image
     CameraAccessFrame cameraAccessFrame;
+
+    //storage for preview dimensions
     private int frameWidth, frameHeight;
+
+    //booleans for synchronization since I can't sync something happening on the GPU
     private boolean readyForFrame = false;
     private boolean frameAnalyzed = true;
     private boolean stopRecording = false;
+
     List<MatOfPoint> contours;
     ArrayList<Point> centroids;
 
@@ -77,12 +92,15 @@ public class Analyzer extends Thread{
         }
     }
 
+    //sync frame preview before run loop begins
     public void onStartRecord() {
+        stopRecording = false;
         if(!readyForFrame && frameAnalyzed)
             readyForFrame = true;
         start();
     }
 
+    //sync thread to end after current analysis if there is one
     public void onStopRecord(){
         stopRecording = true;
     }
@@ -92,12 +110,12 @@ public class Analyzer extends Thread{
         frameAnalyzed = false;
 
         if (isColorSelected) {
+            //process frame
             detector.process(rgba);
             contours = detector.getContours();
-            Log.e("Contours count", " " + contours.size());
-            //Imgproc.drawContours(rgba, contours, -1, CONTOUR_COLOR);
+            Log.i("Contours count", " " + contours.size());
 
-            //find centroids
+            //find centroids for each found contour
             Moments moments;
             Point p;
             centroids.clear();
@@ -111,16 +129,16 @@ public class Analyzer extends Thread{
                 centroids.add(p);
             }
 
-            Mat colorLabel = rgba.submat(4, 68, 4, 68);
-            colorLabel.setTo(blobColorRgba);
-
-            Mat spectrumLabel = rgba.submat(4, 4 + spectrum.rows(), 70, 70 + spectrum.cols());
-            spectrum.copyTo(spectrumLabel);
-
+            //display color range in the corner
+            //Mat colorLabel = rgba.submat(4, 68, 4, 68);
+            //colorLabel.setTo(blobColorRgba);
+            //Mat spectrumLabel = rgba.submat(4, 4 + spectrum.rows(), 70, 70 + spectrum.cols());
+            //spectrum.copyTo(spectrumLabel);
         }
 
         //TODO: move the motor appropriately
 
+        //get ready for a new frame
         readyForFrame = true;
         frameAnalyzed = true;
     }
@@ -134,9 +152,11 @@ public class Analyzer extends Thread{
     }
 
     public void liveCalibrate(){
+        //choose point in center of preview
         int x = frameWidth / 2;
         int y = frameHeight / 2;
 
+        //create an 8x8 pixel rectangle to average color at center
         Rect rect = new Rect();
 
         rect.x = x - 4;
@@ -180,6 +200,8 @@ public class Analyzer extends Thread{
             liveCalibrate();
         }
         while(!interrupted()) {
+            //if a frame is loaded and converted, the analyzer switches to "not ready for frame" so
+            //the frame can then be analyzed
             if (!readyForFrame) {
                 analyze();
             }
@@ -192,7 +214,7 @@ public class Analyzer extends Thread{
         }
     }
 
-
+    //got this class and interface from someone else in order to do the android camera to OpenCV image conversion
     private class CameraAccessFrame implements CameraFrame {
         private Mat mYuvFrameData;
         private Mat mRgba;

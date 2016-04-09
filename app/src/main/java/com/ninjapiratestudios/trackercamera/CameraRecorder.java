@@ -60,6 +60,8 @@ public class CameraRecorder {
             camera.unlock();
             setupCamera();
             mediaRecorder.start();
+            camera.reconnect();
+            cameraPreview.onStartRecord();
             Log.i(LOG_TAG, "Camera recording started");
         } catch (Exception e) {
             // TODO Provide graceful app exit in future iteration
@@ -72,6 +74,7 @@ public class CameraRecorder {
      * Stops Camera recording.
      */
     public void stopRecording() {
+        cameraPreview.onStopRecord();
         mediaRecorder.stop();
         releaseMediaResource();
         camera.lock();
@@ -91,6 +94,7 @@ public class CameraRecorder {
 
     public void releaseCameraResource() {
         // Release the camera for other applications
+        cameraPreview.onStopRecord();
         if (camera != null) {
             camera.lock();
             camera.stopPreview();

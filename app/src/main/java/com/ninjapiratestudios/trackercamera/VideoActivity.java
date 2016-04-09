@@ -12,6 +12,8 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.widget.ImageButton;
 
+import org.opencv.android.OpenCVLoader;
+
 import java.io.File;
 import java.util.Locale;
 
@@ -37,6 +39,17 @@ public class VideoActivity extends FragmentActivity implements
         mViewPager = (ViewPager) findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("OpenCV", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+        } else {
+            Log.d("OpenCV", "OpenCV library found inside package. Using it!");
+        }
     }
 
     /**
