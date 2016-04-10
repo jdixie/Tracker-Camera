@@ -8,4 +8,7 @@
     <string name="fn_dialog_file_name">Enter Video File Name to Save</string>
     <string name="fn_dialog_record_button">Record</string>
     <string name="fn_dialog_cancel_button">Cancel</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
