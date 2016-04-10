@@ -1,5 +1,6 @@
 package com.ninjapiratestudios.trackercamera;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
@@ -20,6 +21,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder
     SurfaceTexture camFrame;
     private byte[] buffer;
     Analyzer analyzer;
+    Activity activity;
 
     public CameraPreview(Context context, Camera camera) {
         super(context);

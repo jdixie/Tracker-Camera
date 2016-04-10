@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import org.opencv.android.OpenCVLoader;
@@ -28,6 +29,7 @@ public class VideoActivity extends FragmentActivity implements
     private boolean intentAppExit; // Prevents release of camera resources
     private ImageButton recordButton;
     private boolean stopImage;
+    Thread overlayHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,33 @@ public class VideoActivity extends FragmentActivity implements
         mViewPager = (ViewPager) findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
+
+        Overlay.setupGraphic(this);
+        addContentView(Overlay.getGraphic(),
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+
+        //every 100 milliseconds update overlay draw
+        overlayHelper = new Thread(){
+            @Override
+            public void run(){
+                while(!interrupted()) {
+                    try {
+                        synchronized (this) {
+                            wait(50);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Overlay.invalidate();
+                                }
+                            });
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
     }
 
     @Override
@@ -50,6 +79,13 @@ public class VideoActivity extends FragmentActivity implements
         } else {
             Log.d("OpenCV", "OpenCV library found inside package. Using it!");
         }
+        overlayHelper.start();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        overlayHelper.interrupt();
     }
 
     /**

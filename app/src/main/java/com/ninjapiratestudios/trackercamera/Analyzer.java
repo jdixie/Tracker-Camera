@@ -64,6 +64,7 @@ public class Analyzer extends Thread{
     List<MatOfPoint> contours;
     ArrayList<Point> centroids;
 
+
     public Analyzer(int w, int h) {
         frameWidth = w;
         frameHeight = h;
@@ -98,11 +99,17 @@ public class Analyzer extends Thread{
         if(!readyForFrame && frameAnalyzed)
             readyForFrame = true;
         start();
+        Overlay.toggleDraw();
     }
 
     //sync thread to end after current analysis if there is one
     public void onStopRecord(){
         stopRecording = true;
+        Overlay.toggleDraw();
+    }
+
+    private void invalidateOverlay() {
+        Overlay.invalidate();
     }
 
     //analyze frame for contours based on the color(s)
@@ -119,6 +126,8 @@ public class Analyzer extends Thread{
             Moments moments;
             Point p;
             centroids.clear();
+            Overlay.toggleReady();
+            Overlay.clearBlobs();
             for(int i = 0; i < contours.size(); i++){
                 moments = Imgproc.moments(contours.get(i));
                 p = new Point();
@@ -127,13 +136,9 @@ public class Analyzer extends Thread{
                 p.y = moments.get_m01() / moments.get_m00();
                 Log.i("Centroid", p.x + ", " + p.y);
                 centroids.add(p);
+                Overlay.addBlob(p);
             }
-
-            //display color range in the corner
-            //Mat colorLabel = rgba.submat(4, 68, 4, 68);
-            //colorLabel.setTo(blobColorRgba);
-            //Mat spectrumLabel = rgba.submat(4, 4 + spectrum.rows(), 70, 70 + spectrum.cols());
-            //spectrum.copyTo(spectrumLabel);
+            Overlay.toggleReady();
         }
 
         //TODO: move the motor appropriately
