@@ -11,27 +11,45 @@ import android.view.View;
  * The idea here is to create the rectangle overlay that will outline the tracked subject.
  * This may well be temporary after I plug in OpenGL ES
  */
-public class Overlay extends View {
-    private Paint paint = new Paint();
-    Overlay(Context context) {
-        super(context);
+public class Overlay {
+    private static boolean draw = false;
+    private static Graphic graphic;
+
+    public static void setupGraphic(Context c){
+        graphic = new Graphic(c);
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    public static Graphic getGraphic() { return graphic; }
 
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.YELLOW);
-        paint.setStrokeWidth(10);
+    public static void toggleDraw() { draw = !draw; }
 
-        //rectangle center
-        int x = canvas.getWidth()/2;
-        int y = canvas.getHeight()/2;
-        int xRadius = canvas.getHeight()/3;
-        int yRadius = canvas.getHeight()/3;
+    public static void invalidate() { graphic.invalidate(); }
 
-        //draw guide box
-        canvas.drawRect(x-xRadius, y-yRadius, x+xRadius, y+yRadius, paint);
+    private static class Graphic extends View {
+        private Paint paint = new Paint();
+
+        Graphic(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            if (draw) {
+                super.onDraw(canvas);
+
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setColor(Color.YELLOW);
+                paint.setStrokeWidth(10);
+
+                //rectangle center
+                int x = canvas.getWidth() / 2;
+                int y = canvas.getHeight() / 2;
+                int xRadius = canvas.getHeight() / 3;
+                int yRadius = canvas.getHeight() / 3;
+
+                //draw guide box
+                canvas.drawRect(x - xRadius, y - yRadius, x + xRadius, y + yRadius, paint);
+            }
+        }
     }
 }

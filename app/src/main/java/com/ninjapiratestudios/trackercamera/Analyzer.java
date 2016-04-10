@@ -64,6 +64,7 @@ public class Analyzer extends Thread{
     List<MatOfPoint> contours;
     ArrayList<Point> centroids;
 
+
     public Analyzer(int w, int h) {
         frameWidth = w;
         frameHeight = h;
@@ -98,11 +99,17 @@ public class Analyzer extends Thread{
         if(!readyForFrame && frameAnalyzed)
             readyForFrame = true;
         start();
+        Overlay.toggleDraw();
     }
 
     //sync thread to end after current analysis if there is one
     public void onStopRecord(){
         stopRecording = true;
+        Overlay.toggleDraw();
+    }
+
+    private void invalidateOverlay() {
+        Overlay.invalidate();
     }
 
     //analyze frame for contours based on the color(s)
@@ -128,6 +135,9 @@ public class Analyzer extends Thread{
                 Log.i("Centroid", p.x + ", " + p.y);
                 centroids.add(p);
             }
+
+            //TODO: send data to the overlay
+
 
             //display color range in the corner
             //Mat colorLabel = rgba.submat(4, 68, 4, 68);
