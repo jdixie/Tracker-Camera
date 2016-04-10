@@ -4,7 +4,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Environment;
 
-import com.ninjapiratestudios.trackercamera.ItemFragment;
+import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
 
 import org.junit.Before;
 import org.junit.Test;

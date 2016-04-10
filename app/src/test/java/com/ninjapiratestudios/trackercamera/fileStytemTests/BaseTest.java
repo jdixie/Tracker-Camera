@@ -1,17 +1,12 @@
 package com.ninjapiratestudios.trackercamera.fileStytemTests;
 
-import android.app.DialogFragment;
-import android.app.Fragment;
-
-import com.ninjapiratestudios.trackercamera.fileContent.FileContent;
+import com.ninjapiratestudios.trackercamera.fileSystem.fileContent.FileContent;
 
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.BDDMockito.given;
 

@@ -1,4 +1,4 @@
-package com.ninjapiratestudios.trackercamera;
+package com.ninjapiratestudios.trackercamera.fileSystem;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -7,14 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ninjapiratestudios.trackercamera.ItemFragment.OnListFragmentInteractionListener;
-import com.ninjapiratestudios.trackercamera.fileContent.FileContent;
+import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment.OnListFragmentInteractionListener;
+import com.ninjapiratestudios.trackercamera.R;
+import com.ninjapiratestudios.trackercamera.fileSystem.fileContent.FileContent;
 
 import java.io.File;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link com.ninjapiratestudios.trackercamera.fileContent.FileContent.FileHolder} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link com.ninjapiratestudios.trackercamera.fileSystem.fileContent.FileContent.FileHolder} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */

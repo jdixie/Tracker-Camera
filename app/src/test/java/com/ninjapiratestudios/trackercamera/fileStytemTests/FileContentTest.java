@@ -1,15 +1,7 @@
 package com.ninjapiratestudios.trackercamera.fileStytemTests;
 
-import android.app.DialogFragment;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.ninjapiratestudios.trackercamera.ItemFragment;
-import com.ninjapiratestudios.trackercamera.fileContent.FileContent;
+import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
+import com.ninjapiratestudios.trackercamera.fileSystem.fileContent.FileContent;
 
 import static org.junit.Assert.*;
 

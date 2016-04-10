@@ -1,4 +1,4 @@
-package com.ninjapiratestudios.trackercamera.fileContent;
+package com.ninjapiratestudios.trackercamera.fileSystem.fileContent;
 
 import android.util.Log;
 

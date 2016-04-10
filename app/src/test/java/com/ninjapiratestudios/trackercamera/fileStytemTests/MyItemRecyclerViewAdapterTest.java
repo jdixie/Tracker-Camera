@@ -1,7 +1,7 @@
 package com.ninjapiratestudios.trackercamera.fileStytemTests;
-import com.ninjapiratestudios.trackercamera.ItemFragment;
-import com.ninjapiratestudios.trackercamera.MyItemRecyclerViewAdapter;
-import com.ninjapiratestudios.trackercamera.fileContent.FileContent;
+import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
+import com.ninjapiratestudios.trackercamera.fileSystem.MyItemRecyclerViewAdapter;
+import com.ninjapiratestudios.trackercamera.fileSystem.fileContent.FileContent;
 
 import org.junit.Before;
 import org.junit.Test;

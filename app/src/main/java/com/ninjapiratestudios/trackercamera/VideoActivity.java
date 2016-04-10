@@ -12,6 +12,8 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.widget.ImageButton;
 
+import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
+
 import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
