@@ -126,6 +126,8 @@ public class Analyzer extends Thread{
             Moments moments;
             Point p;
             centroids.clear();
+            Overlay.toggleReady();
+            Overlay.clearBlobs();
             for(int i = 0; i < contours.size(); i++){
                 moments = Imgproc.moments(contours.get(i));
                 p = new Point();
@@ -134,16 +136,9 @@ public class Analyzer extends Thread{
                 p.y = moments.get_m01() / moments.get_m00();
                 Log.i("Centroid", p.x + ", " + p.y);
                 centroids.add(p);
+                Overlay.addBlob(p);
             }
-
-            //TODO: send data to the overlay
-
-
-            //display color range in the corner
-            //Mat colorLabel = rgba.submat(4, 68, 4, 68);
-            //colorLabel.setTo(blobColorRgba);
-            //Mat spectrumLabel = rgba.submat(4, 4 + spectrum.rows(), 70, 70 + spectrum.cols());
-            //spectrum.copyTo(spectrumLabel);
+            Overlay.toggleReady();
         }
 
         //TODO: move the motor appropriately

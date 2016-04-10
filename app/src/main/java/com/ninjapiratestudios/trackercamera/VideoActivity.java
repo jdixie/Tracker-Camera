@@ -53,7 +53,7 @@ public class VideoActivity extends FragmentActivity implements
                 while(!interrupted()) {
                     try {
                         synchronized (this) {
-                            wait(100);
+                            wait(50);
 
                             runOnUiThread(new Runnable() {
                                 @Override
