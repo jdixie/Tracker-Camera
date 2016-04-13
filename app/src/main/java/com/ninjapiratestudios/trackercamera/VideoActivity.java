@@ -47,29 +47,6 @@ public class VideoActivity extends FragmentActivity implements
         Overlay.setupGraphic(this);
         addContentView(Overlay.getGraphic(),
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-
-        //every 100 milliseconds update overlay draw
-        overlayHelper = new Thread(){
-            @Override
-            public void run(){
-                while(!interrupted()) {
-                    try {
-                        synchronized (this) {
-                            wait(50);
-
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Overlay.invalidate();
-                                }
-                            });
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
     }
 
     @Override
@@ -81,6 +58,9 @@ public class VideoActivity extends FragmentActivity implements
         } else {
             Log.d("OpenCV", "OpenCV library found inside package. Using it!");
         }
+
+        //every 100 milliseconds update overlay draw
+        overlayHelper = new OverlayThread();
         overlayHelper.start();
     }
 
@@ -88,6 +68,8 @@ public class VideoActivity extends FragmentActivity implements
     protected void onPause(){
         super.onPause();
         overlayHelper.interrupt();
+        overlayHelper = null;
+        Log.i(LOG_TAG, "Thread Interrupt called");
     }
 
     /**
@@ -101,54 +83,6 @@ public class VideoActivity extends FragmentActivity implements
 
     public void setIntentAppExit(boolean intentAppExit) {
         this.intentAppExit = intentAppExit;
-    }
-
-    /**
-     * A simple pager adapter that represents 2 Fragment objects, in
-     * sequence.
-     */
-    protected class ScreenSlidePagerAdapter extends FragmentPagerAdapter {
-        public ScreenSlidePagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-        private VideoFragment vF;
-        private ItemFragment iF;
-        @Override
-        public Fragment getItem(int position) {
-            if (position == 0) {
-                if(vF == null) {
-                    vF = new VideoFragment();
-                    return vF;
-                } else {
-                    return vF;
-                }
-            } else {
-                if(iF == null)
-                {
-                     iF = new ItemFragment();
-                    return iF;
-                } else {
-                    return iF;
-                }
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return 2;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            Locale l = Locale.getDefault();
-            switch (position) {
-                case 0:
-                    return getString(R.string.record_page).toUpperCase(l);
-                case 1:
-                    return getString(R.string.sharing).toUpperCase(l);
-            }
-            return null;
-        }
     }
 
     @Override
@@ -198,6 +132,77 @@ public class VideoActivity extends FragmentActivity implements
             } else {
                 stopImage = false;
                 recordButton.setImageResource(R.drawable.record);
+            }
+        }
+    }
+
+    /**
+     * A simple pager adapter that represents 2 Fragment objects, in
+     * sequence.
+     */
+    protected class ScreenSlidePagerAdapter extends FragmentPagerAdapter {
+        public ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+        private VideoFragment vF;
+        private ItemFragment iF;
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0) {
+                if(vF == null) {
+                    vF = new VideoFragment();
+                    return vF;
+                } else {
+                    return vF;
+                }
+            } else {
+                if(iF == null)
+                {
+                    iF = new ItemFragment();
+                    return iF;
+                } else {
+                    return iF;
+                }
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            Locale l = Locale.getDefault();
+            switch (position) {
+                case 0:
+                    return getString(R.string.record_page).toUpperCase(l);
+                case 1:
+                    return getString(R.string.sharing).toUpperCase(l);
+            }
+            return null;
+        }
+    }
+
+    private class OverlayThread extends Thread {
+        @Override
+        public void run(){
+            while(!interrupted()) {
+                try {
+                    Log.i(LOG_TAG, "Overlay Thread Running!");
+                    synchronized (this) {
+                        wait(50);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Overlay.invalidate();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
