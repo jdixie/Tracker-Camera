@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="/home/benjamin/Software_Engineering_Project/Josh_Dixie/Tracker-Camera/openCVLibrary310/src/main/assets"/></dataSet><dataSet config="release"><source path="/home/benjamin/Software_Engineering_Project/Josh_Dixie/Tracker-Camera/openCVLibrary310/src/release/assets"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="C:\Users\Alton\AndroidStudioProjects\Tracker-Camera\openCVLibrary310\src\main\assets"/></dataSet><dataSet config="release"><source path="C:\Users\Alton\AndroidStudioProjects\Tracker-Camera\openCVLibrary310\src\release\assets"/></dataSet></merger>
