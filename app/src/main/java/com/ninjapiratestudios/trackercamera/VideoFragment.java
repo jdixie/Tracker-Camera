@@ -26,6 +26,7 @@ public class VideoFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.i(LOG_TAG, "onAttach()");
         vAListener = (OnVideoAddedListener) context;
         activity = (VideoActivity)getActivity();
         // Prepare camera and OpenGL
@@ -79,6 +80,7 @@ public class VideoFragment extends Fragment {
         if(!activity.isIntentAppExit()) {
             cameraRecorder.releaseMediaResource();
             cameraRecorder.releaseCameraResource();
+            activity.finish();
         }
         Log.i(LOG_TAG, "onPause()");
     }
