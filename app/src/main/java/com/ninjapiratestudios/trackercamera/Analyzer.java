@@ -55,6 +55,7 @@ public class Analyzer extends Thread{
 
     //storage for preview dimensions
     private int frameWidth, frameHeight;
+    Point center;
 
     //booleans for synchronization since I can't sync something happening on the GPU
     private boolean readyForFrame = false;
@@ -64,10 +65,14 @@ public class Analyzer extends Thread{
     List<MatOfPoint> contours;
     ArrayList<Point> centroids;
 
+    Point lastTrackedCentroid = null;
+
+    private final int EPSILON = 10;
 
     public Analyzer(int w, int h) {
         frameWidth = w;
         frameHeight = h;
+        center = new Point(frameWidth/2.0, frameHeight/2.0);
         rgba = new Mat(frameHeight, frameWidth, CvType.CV_8UC4);
         detector = new ColorBlobDetector();
         spectrum = new Mat();
@@ -128,6 +133,7 @@ public class Analyzer extends Thread{
             centroids.clear();
             Overlay.toggleReady();
             Overlay.clearBlobs();
+
             for(int i = 0; i < contours.size(); i++){
                 moments = Imgproc.moments(contours.get(i));
                 p = new Point();
@@ -139,13 +145,52 @@ public class Analyzer extends Thread{
                 Overlay.addBlob(p);
             }
             Overlay.toggleReady();
+
+            if(lastTrackedCentroid == null){
+                Double shortestFromCenter = Double.POSITIVE_INFINITY;
+                for(Point t:centroids){
+                    if(distanceFromCenter(t) < shortestFromCenter){
+                        lastTrackedCentroid = t;
+                    }
+                }
+            }
+            else{
+                Double shortestFromLastCentroid = Double.POSITIVE_INFINITY;
+                for(Point t:centroids){
+                    if(distanceFromLastTrackedCentroid(t) < shortestFromLastCentroid){
+                        lastTrackedCentroid = t;
+                    }
+                }
+            }
+
+            int locationAsPercent = (int)((lastTrackedCentroid.x / (double)frameWidth) * 100);
+
+            if(Math.abs(locationAsPercent - 50) < EPSILON){
+                if(locationAsPercent > 60) {
+                    //turn left
+                }
+                else {
+                    //turn right
+                }
+            }
+
         }
 
-        //TODO: move the motor appropriately
+
+
 
         //get ready for a new frame
         readyForFrame = true;
         frameAnalyzed = true;
+    }
+
+    private double distanceFromCenter(Point p){
+        return Math.sqrt(Math.abs(center.x * center.x - p.x * p.x) + Math.abs(center.y * center.y - p.y * p.y));
+    }
+
+    private double distanceFromLastTrackedCentroid(Point p){
+        return Math.sqrt(Math.abs(lastTrackedCentroid.x * lastTrackedCentroid.x - p.x * p.x) +
+                Math.abs(lastTrackedCentroid.y * lastTrackedCentroid.y - p.y * p.y));
     }
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {

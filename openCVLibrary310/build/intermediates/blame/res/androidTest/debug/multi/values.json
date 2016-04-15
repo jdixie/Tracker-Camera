@@ -1,18 +1,22 @@
 [
     {
-        "outputFile": "C:\\home\\benjamin\\Software_Engineering_Project\\Josh_Dixie\\Tracker-Camera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "outputFile": "/Users/jjdixie/AndroidStudioProjects/TrackerCamera/openCVLibrary310/build/intermediates/res/merged/androidTest/debug/values/values.xml",
         "map": []
     },
     {
-        "outputFile": "C:\\Users\\Alton\\AndroidStudioProjects\\Tracker-Camera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "outputFile": "/Users/jjdixie/AndroidStudioProjects/TrackerCamera/C:\\home\\benjamin\\Software_Engineering_Project\\Josh_Dixie\\Tracker-Camera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
         "map": []
     },
     {
-        "outputFile": "C:\\Users\\jjdixie\\AndroidStudioProjects\\TrackerCamera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "outputFile": "/Users/jjdixie/AndroidStudioProjects/TrackerCamera/C:\\Users\\Alton\\AndroidStudioProjects\\Tracker-Camera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
         "map": []
     },
     {
-        "outputFile": "C:\\Users\\jjdixie\\AndroidStudioProjects\\CTCam\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "outputFile": "/Users/jjdixie/AndroidStudioProjects/TrackerCamera/C:\\Users\\jjdixie\\AndroidStudioProjects\\TrackerCamera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "map": []
+    },
+    {
+        "outputFile": "/Users/jjdixie/AndroidStudioProjects/TrackerCamera/C:\\Users\\jjdixie\\AndroidStudioProjects\\CTCam\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
         "map": []
     }
 ]
