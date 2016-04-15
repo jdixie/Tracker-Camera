@@ -16,15 +16,20 @@ import android.widget.Toast;
  * @author John Qualls
  * @version 3/5/2016
  */
-public class FileNameDialog extends DialogFragment {
+public class PopupDialog extends DialogFragment {
     // Fragment tag name For FragmentManager
     public final static String LOG_TAG = "FILE_NAME_DIALOG";
     public final static int MAX_FILE_NAME_SIZE = 251;
     protected final static String FRAGMENT_TAG = "DIALOG_FRAGMENT";
     private EditText editText;
     private CameraRecorder cameraRecorder;
-    private VideoActivity activity;
-
+    private VideoActivity videoActivity;
+    private Setup setupActivity;
+    public enum DialogType {
+        FILE_NAME_DIALOG,
+        BLUETOOTH_ALERT;
+    }
+    private DialogType type;
     /**
      * Static factory method that is required for fragments to create new
      * objects.
@@ -32,16 +37,26 @@ public class FileNameDialog extends DialogFragment {
      * @param cameraRecorder The object responsible for all camera operations.
      * @return A new instance of this class.
      */
-    public static FileNameDialog newInstance(CameraRecorder cameraRecorder) {
-        FileNameDialog fileNameDialog = new FileNameDialog();
-        fileNameDialog.cameraRecorder = cameraRecorder;
-        return fileNameDialog;
+    public static PopupDialog newInstance(CameraRecorder cameraRecorder) {
+        PopupDialog popupDialog = new PopupDialog();
+        popupDialog.type = DialogType.FILE_NAME_DIALOG;
+        popupDialog.cameraRecorder = cameraRecorder;
+        return popupDialog;
+    }
+
+    public static PopupDialog newInstance(){
+        PopupDialog popupDialog = new PopupDialog();
+        popupDialog.type = DialogType.BLUETOOTH_ALERT;
+        return popupDialog;
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.activity = (VideoActivity)activity;
+        if(type == DialogType.FILE_NAME_DIALOG)
+            this.videoActivity = (VideoActivity)activity;
+        else if(type == DialogType.BLUETOOTH_ALERT)
+            this.setupActivity = (Setup)activity;
     }
 
     /**
@@ -73,19 +88,27 @@ public class FileNameDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate xml view
-        View v = inflater.inflate(R.layout.fragment_file_name_dialog,
-                container, false);
+        if(type == DialogType.FILE_NAME_DIALOG) {
+            View v = inflater.inflate(R.layout.fragment_file_name_dialog,
+                    container, false);
 
-        // Set button listeners
-        v.findViewById(R.id.fn_dialog_record_button).setOnClickListener
-                (new ButtonClick());
-        v.findViewById(R.id.fn_dialog_cancel_button).setOnClickListener
-                (new ButtonClick());
+            // Set button listeners
+            v.findViewById(R.id.fn_dialog_record_button).setOnClickListener
+                    (new ButtonClick());
+            v.findViewById(R.id.fn_dialog_cancel_button).setOnClickListener
+                    (new ButtonClick());
 
-        // Get reference to EditText
-        editText = (EditText) v.findViewById(R.id.fn_dialog_file_name);
+            // Get reference to EditText
+            editText = (EditText) v.findViewById(R.id.fn_dialog_file_name);
 
-        return v;
+            return v;
+        }else{
+            View v = inflater.inflate(R.layout.bluetooth_alert,
+                    container, false);
+            v.findViewById(R.id.btError_Button).setOnClickListener
+                    (new ButtonClick());
+            return v;
+        }
     }
 
     /**
@@ -138,16 +161,18 @@ public class FileNameDialog extends DialogFragment {
                     String fileName = editText.getText().toString();
                     if (fileNameValidation(fileName)) {
                         // Begin recording and dismiss dialog
-                        activity.toggleRecordButton();
+                        videoActivity.toggleRecordButton();
                         cameraRecorder.setCameraRecording(true);
                         cameraRecorder.setFileName(fileName);
                         cameraRecorder.startRecording();
                         dismiss();
                     }
                 }
-            } else { // Cancel was clicked
+            } else if(v.getId() == R.id.fn_dialog_cancel_button) { // Cancel was clicked
                 // Dismiss Dialog
                 dismiss();
+            }else if(v.getId() == R.id.btError_Button){
+                setupActivity.finish();
             }
         }
     }
