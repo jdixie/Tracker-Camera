@@ -38,26 +38,17 @@ public class VideoActivity extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.content_setup);
+        setContentView(R.layout.activity_init);
 
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            Log.i(LOG_TAG, "Thread" + e.getMessage());
-        } finally{
-            setContentView(R.layout.activity_init);
+        // Setup PagerAdapter for swiping functionality
+        PagerAdapter pagerAdapter;
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(pagerAdapter);
 
-            // BluetoothUtils PagerAdapter for swiping functionality
-            PagerAdapter pagerAdapter;
-            mViewPager = (ViewPager) findViewById(R.id.pager);
-            pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
-            mViewPager.setAdapter(pagerAdapter);
-
-            Overlay.setupGraphic(this);
-            addContentView(Overlay.getGraphic(),
-                    new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-        }
-
+        Overlay.setupGraphic(this);
+        addContentView(Overlay.getGraphic(),
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
     }
 
     @Override

@@ -22,13 +22,48 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-public class BluetoothUtils extends Activity {
+public class Setup extends Activity {
 	
 	private final String TAG = "BluetoothLog";//To isolate
     ArrayList<BluetoothDevice> mArrayAdapter = new ArrayList<>();
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice raspberryPi2;
     EditText degree;
+
+    private Thread setupPage;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.content_setup);
+
+        if(startBluetooth())
+            discover_helper();
+        else{
+            alertUser();
+        }
+
+        setupPage = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    super.run();
+                    //getReadPermissions();
+                    //getCameraPermissions();
+                    //getAudioPermissions();
+                    sleep(20000);
+                } catch (Exception e) {
+
+                }finally {
+                    goTo_videoActivity();
+                    //alertUser();
+                }
+            }
+        };
+        setupPage.start();
+
+    }
 
 
 	public boolean startBluetooth(){
@@ -63,12 +98,25 @@ public class BluetoothUtils extends Activity {
     public void discover_helper(){
         new Timer().schedule(new TimerTask() {
             @Override
-            public void run(){
+            public void run() {
                 discoverM(null);
             }
         }, 1000);
     }
-
+    public void alertUser(){
+        PopupDialog dialog = PopupDialog.newInstance();
+        dialog.show(getFragmentManager(), PopupDialog.FRAGMENT_TAG);
+    }
+    public void goTo_videoActivity(){
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Intent i = new Intent(Setup.this, VideoActivity.class);
+                startActivity(i);
+                finish();
+            }
+        }, 2000);
+    }
 
     /**
      * Method that gets called when the discover button is clicked. It will look for any device in the
@@ -96,6 +144,7 @@ public class BluetoothUtils extends Activity {
                         Log.d(TAG, "Device: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress());
                         //Toast.makeText(getApplicationContext(), "Successfully found: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress(), Toast.LENGTH_SHORT).show();
                         connecting(null);
+                        goTo_videoActivity();
                     }
 
                 }
