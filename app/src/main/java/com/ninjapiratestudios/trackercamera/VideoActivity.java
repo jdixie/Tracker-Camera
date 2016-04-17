@@ -27,6 +27,7 @@ import java.util.Locale;
 public class VideoActivity extends FragmentActivity implements
         ItemFragment.OnListFragmentInteractionListener, VideoFragment.OnVideoAddedListener{
     public final static String LOG_TAG = "VIDEO_ACTIVITY";
+    private boolean overlayThreadRunning = true;
     private ViewPager mViewPager;
     private boolean intentAppExit; // Prevents release of camera resources
     private ImageButton recordButton;
@@ -70,6 +71,7 @@ public class VideoActivity extends FragmentActivity implements
         }
 
         //every 100 milliseconds update overlay draw
+        overlayThreadRunning = true;
         overlayHelper = new OverlayThread();
         overlayHelper.start();
     }
@@ -77,7 +79,8 @@ public class VideoActivity extends FragmentActivity implements
     @Override
     protected void onPause(){
         super.onPause();
-        overlayHelper.interrupt();
+        //overlayHelper.interrupt();
+        overlayThreadRunning = false;
         overlayHelper = null;
         Log.i(LOG_TAG, "Thread Interrupt called");
     }
@@ -197,9 +200,10 @@ public class VideoActivity extends FragmentActivity implements
     private class OverlayThread extends Thread {
         @Override
         public void run(){
-            while(!interrupted()) {
+            while(overlayThreadRunning) {
+                Log.i(LOG_TAG, "Overlay Thread Running!");
                 try {
-                    Log.i(LOG_TAG, "Overlay Thread Running!");
+
                     synchronized (this) {
                         wait(50);
 
