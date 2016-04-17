@@ -1,14 +1,11 @@
 package com.ninjapiratestudios.trackercamera;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -17,7 +14,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,52 +21,14 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.logging.Handler;
 
-public class Setup extends Activity {
-
-    private Thread setupPage;
-
+public class BluetoothUtils extends Activity {
 	
-	private static final String TAG = "BluetoothLog";//To isolate
+	private final String TAG = "BluetoothLog";//To isolate
     ArrayList<BluetoothDevice> mArrayAdapter = new ArrayList<>();
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice raspberryPi2;
     EditText degree;
-    private Setup setupActivity;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_setup);
-
-        /*if(startBluetooth())
-            discover_helper();
-        else{
-            alertUser();
-        }*/
-        //Intent btIntent = new Intent(this, BT_Service.class);
-        //startService(btIntent);
-
-        setupPage = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    super.run();
-                    //getReadPermissions();
-                    //getCameraPermissions();
-                    //getAudioPermissions();
-                    sleep(20000);
-                } catch (Exception e) {
-
-                }finally {
-                    alertUser();
-                }
-            }
-        };
-        setupPage.start();
-    }//onCreate
 
 
 	public boolean startBluetooth(){
@@ -78,11 +36,11 @@ public class Setup extends Activity {
         //Determine if Android supports Bluetooth
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
-            Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Your device does not support Bluetooth");
             return false;
         } else {
-            Toast.makeText(getApplicationContext(), "Your device support Bluetooth", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Your device support Bluetooth", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Your device support Bluetooth");
             //        Turn on Bluetooth if disabled
             if (!mBluetoothAdapter.isEnabled()) {
@@ -96,7 +54,7 @@ public class Setup extends Activity {
                 return true;
             } else {
                 Log.d(TAG, "Bluetooth is already enabled");
-                Toast.makeText(getApplicationContext(), "Bluetooth is already enabled", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Bluetooth is already enabled", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
@@ -109,22 +67,6 @@ public class Setup extends Activity {
                 discoverM(null);
             }
         }, 1000);
-    }
-
-    public void alertUser(){
-        PopupDialog dialog = PopupDialog.newInstance();
-        dialog.show(getFragmentManager(), PopupDialog.FRAGMENT_TAG);
-    }
-
-    public void goTo_videoActivity(){
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Intent i = new Intent(Setup.this, VideoActivity.class);
-                startActivity(i);
-                finish();
-            }
-        }, 2000);
     }
 
 
@@ -152,7 +94,7 @@ public class Setup extends Activity {
 //                            mArrayAdapter.add(device);
                         raspberryPi2 = device;
                         Log.d(TAG, "Device: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress());
-                        Toast.makeText(getApplicationContext(), "Successfully found: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "Successfully found: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress(), Toast.LENGTH_SHORT).show();
                         connecting(null);
                     }
 

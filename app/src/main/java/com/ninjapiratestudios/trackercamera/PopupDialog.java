@@ -24,7 +24,7 @@ public class PopupDialog extends DialogFragment {
     private EditText editText;
     private CameraRecorder cameraRecorder;
     private VideoActivity videoActivity;
-    private Setup setupActivity;
+    private BluetoothUtils setupActivity;
     public enum DialogType {
         FILE_NAME_DIALOG,
         BLUETOOTH_ALERT;
@@ -56,7 +56,7 @@ public class PopupDialog extends DialogFragment {
         if(type == DialogType.FILE_NAME_DIALOG)
             this.videoActivity = (VideoActivity)activity;
         else if(type == DialogType.BLUETOOTH_ALERT)
-            this.setupActivity = (Setup)activity;
+            this.setupActivity = (BluetoothUtils)activity;
     }
 
     /**

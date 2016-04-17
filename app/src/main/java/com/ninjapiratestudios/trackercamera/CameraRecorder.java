@@ -141,7 +141,7 @@ public class CameraRecorder {
      *                   the camera.
      */
     private void setupCamera() throws Exception {
-        // Setup camera configurations for video recording
+        // BluetoothUtils camera configurations for video recording
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
