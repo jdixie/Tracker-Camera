@@ -1,6 +1,5 @@
 package com.ninjapiratestudios.trackercamera;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -8,11 +7,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,54 +19,28 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-public class Setup extends Activity {
-	
-	private final String TAG = "BluetoothLog";//To isolate
+/**
+ * Created by Jalen on 4/17/2016.
+ */
+public class Bluetooth_Comms {
+    private final String TAG = "Bluetooth_Comms";
     ArrayList<BluetoothDevice> mArrayAdapter = new ArrayList<>();
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice raspberryPi2;
     EditText degree;
-    Boolean connected = false;
+    private Boolean connected = false;
 
+    public Context ctx;
 
-    private Thread setupPage;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.content_setup);
-
-        if(((BT_Application)this.getApplicationContext()).mBluetooth.startBluetooth())
-            ((BT_Application)this.getApplicationContext()).mBluetooth.discover_helper();
-        else
-            alertUser();
-
-        //connected = ((BT_Application)this.getApplicationContext()).mBluetooth.isConnected();
-
-        setupPage = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    super.run();
-                    //getReadPermissions();
-                    //getCameraPermissions();
-                    //getAudioPermissions();
-                    sleep(20000);
-                } catch (Exception e) {
-
-                }finally {
-                    goTo_videoActivity();
-                    //alertUser();
-                }
-            }
-        };
-        setupPage.start();
-
+    public Bluetooth_Comms(Context context){
+        ctx = context;
     }
 
+    public Boolean isConnected(){
+        return connected;
+    }
 
-	public boolean startBluetooth(){
+    public boolean startBluetooth(){
         //Start of bluetooth
         //Determine if Android supports Bluetooth
         if (mBluetoothAdapter == null) {
@@ -96,7 +67,7 @@ public class Setup extends Activity {
                 return true;
             }
         }
-	}
+    }
 
     public void discover_helper(){
         new Timer().schedule(new TimerTask() {
@@ -105,20 +76,6 @@ public class Setup extends Activity {
                 discoverM(null);
             }
         }, 1000);
-    }
-    public void alertUser(){
-        PopupDialog dialog = PopupDialog.newInstance();
-        dialog.show(getFragmentManager(), PopupDialog.FRAGMENT_TAG);
-    }
-    public void goTo_videoActivity(){
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Intent i = new Intent(Setup.this, VideoActivity.class);
-                startActivity(i);
-                finish();
-            }
-        }, 2000);
     }
 
     /**
@@ -147,7 +104,6 @@ public class Setup extends Activity {
                         Log.d(TAG, "Device: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress());
                         //Toast.makeText(getApplicationContext(), "Successfully found: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress(), Toast.LENGTH_SHORT).show();
                         connecting(null);
-                        goTo_videoActivity();
                     }
 
                 }
@@ -165,7 +121,7 @@ public class Setup extends Activity {
 
         // Register the BroadcastReceiver
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
+        ctx.registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
     }
 
 
@@ -240,6 +196,7 @@ public class Setup extends Activity {
 
             public ConnectedThread(BluetoothSocket socket) {
                 Log.d(TAG, "Successfully connected with raspberryPi2");
+                connected = true;
 //                Toast.makeText(getApplicationContext(),"Sucesufully connected with raspbery..",Toast.LENGTH_SHORT).show();
 
                 mmSocket = socket;
@@ -315,30 +272,4 @@ public class Setup extends Activity {
             } catch (IOException e) { }
         }
     }
-
-/*
-    public void getReadPermissions() {
-        //check for permission
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            //ask for permission
-            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_PERMISSION_CODE);
-        }
-    }
-
-    public void getCameraPermissions(){
-        if(ContextCompat.checkSelfPermission(this,
-                Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED){
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-        }
-    }
-
-    public void getAudioPermissions(){
-        if(ContextCompat.checkSelfPermission(this,
-                Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED){
-            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION_CODE);
-        }
-    }
-*/
-
 }
