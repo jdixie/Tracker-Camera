@@ -37,6 +37,7 @@ public class VideoActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_init);
 
         // Setup PagerAdapter for swiping functionality
