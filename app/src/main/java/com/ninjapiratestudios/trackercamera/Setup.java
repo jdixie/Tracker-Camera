@@ -29,7 +29,6 @@ public class Setup extends Activity {
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice raspberryPi2;
     EditText degree;
-    Boolean connected = false;
 
 
     private Thread setupPage;
@@ -44,8 +43,6 @@ public class Setup extends Activity {
             ((BT_Application)this.getApplicationContext()).mBluetooth.discover_helper();
         else
             alertUser();
-
-        //connected = ((BT_Application)this.getApplicationContext()).mBluetooth.isConnected();
 
         setupPage = new Thread() {
             @Override
@@ -111,14 +108,17 @@ public class Setup extends Activity {
         dialog.show(getFragmentManager(), PopupDialog.FRAGMENT_TAG);
     }
     public void goTo_videoActivity(){
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Intent i = new Intent(Setup.this, VideoActivity.class);
-                startActivity(i);
-                finish();
-            }
-        }, 2000);
+        if(((BT_Application)this.getApplicationContext()).mBluetooth.isConnected()) {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Intent i = new Intent(Setup.this, VideoActivity.class);
+                        startActivity(i);
+                        finish();
+                    }
+                }, 2000);
+        }else
+            alertUser();
     }
 
     /**
