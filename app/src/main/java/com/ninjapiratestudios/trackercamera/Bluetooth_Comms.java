@@ -27,7 +27,8 @@ public class Bluetooth_Comms {
     ArrayList<BluetoothDevice> mArrayAdapter = new ArrayList<>();
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice raspberryPi2;
-    EditText degree;
+    //EditText degree;
+    String degree;
     private Boolean connected = false;
 
     public Context ctx;
@@ -45,25 +46,18 @@ public class Bluetooth_Comms {
         //Determine if Android supports Bluetooth
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
-            //Toast.makeText(getApplicationContext(), "Your device does not support Bluetooth", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Your device does not support Bluetooth");
             return false;
         } else {
-            //Toast.makeText(getApplicationContext(), "Your device support Bluetooth", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Your device support Bluetooth");
             //        Turn on Bluetooth if disabled
             if (!mBluetoothAdapter.isEnabled()) {
-                int REQUEST_ENABLE_BT = 1;
-                //Prompt the user to enable bluetooth
-                //Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                //startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                 mBluetoothAdapter.enable();
                 //or just do this, which does not prompt user to enable the bluetooth it just enables it in the background -> mBluetoothAdapter.enable();
                 Log.d(TAG, "Successfully enabled Bluetooth");
                 return true;
             } else {
                 Log.d(TAG, "Bluetooth is already enabled");
-                //Toast.makeText(getApplicationContext(), "Bluetooth is already enabled", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
@@ -96,13 +90,11 @@ public class Bluetooth_Comms {
                     // Get the BluetoothDevice object from the Intent
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     // Add the name and address to an array adapter to show in a ListView
-//                    if (device.getAddress().equals("FC:F8:AE:36:F4:42")) { //Dean
                     if (device.getAddress().equals("00:15:83:09:16:B0")) {//Jalen
 //                    if (device.getAddress().equals("5C:F3:70:71:A0:B5")) {//Raspberie pi
 //                            mArrayAdapter.add(device);
                         raspberryPi2 = device;
                         Log.d(TAG, "Device: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress());
-                        //Toast.makeText(getApplicationContext(), "Successfully found: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress(), Toast.LENGTH_SHORT).show();
                         connecting(null);
                     }
 
@@ -111,13 +103,6 @@ public class Bluetooth_Comms {
         };
 
         mBluetoothAdapter.startDiscovery();
-//        for(BluetoothDevice i: mArrayAdapter){
-//            Log.d(TAG,"Device: "+ i.getName() + "\n" + i.getAddress());
-//            Toast.makeText(getApplicationContext(),"Device: "+ i.getName() + "\n" + i.getAddress(),Toast.LENGTH_SHORT).show();
-//        }
-//
-//
-//        mArrayAdapter.clear();
 
         // Register the BroadcastReceiver
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -130,7 +115,11 @@ public class Bluetooth_Comms {
     }
     boolean sendBool = false;
 
-    public void sendMethod(View view) {
+    public void rotate(int deg){
+        degree = "" + deg;
+    }
+
+    public void sendMethod() {
         sendBool = true;
     }
 
@@ -181,7 +170,6 @@ public class Bluetooth_Comms {
 
 
         private void manageConnectedSocket(BluetoothSocket mmSocket) {
-//            Toast.makeText(getApplicationContext(),"Going to send something..",Toast.LENGTH_SHORT).show();
             Log.d("BluetoothLog", "Going to Start connected thread");
             new ConnectedThread(mmSocket).start();
         }
@@ -197,7 +185,6 @@ public class Bluetooth_Comms {
             public ConnectedThread(BluetoothSocket socket) {
                 Log.d(TAG, "Successfully connected with raspberryPi2");
                 connected = true;
-//                Toast.makeText(getApplicationContext(),"Sucesufully connected with raspbery..",Toast.LENGTH_SHORT).show();
 
                 mmSocket = socket;
                 InputStream tmpIn = null;
@@ -218,17 +205,16 @@ public class Bluetooth_Comms {
                 byte[] buffer = new byte[1024];  // buffer store for the stream
                 int bytes; // bytes returned from read()
                 // Keep listening to the InputStream until an exception occurs
-//                while (true) {
-//                try {
                 while (true){
 
                     //Send Information to server
-//                    write("hello".getBytes());
                     if(sendBool == true) {
-                        Log.d(TAG,"Sending->"+degree.getText());
-                        write(degree.getText().toString().getBytes());
-//                            degree.setText("");
-                        degree.clearComposingText();
+                        //.d(TAG,"Sending->"+degree.getText());
+                        //write(degree.getText().toString().getBytes());
+                        write(degree.getBytes());
+
+                        degree = "";
+                        //degree.clearComposingText();
                         sendBool=false;
                     }
                     try {
@@ -237,17 +223,8 @@ public class Bluetooth_Comms {
                         e.printStackTrace();
                     }
 
-                    // Read from the InputStream
-//                        bytes = mmInStream.read(buffer);
-//                        // Send the obtained bytes to the UI activity
-//                        messageHandler.obtainMessage(1, 0, bytes, buffer).sendToTarget();
-//                        write("1".getBytes());
                 }
 
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                }
             }
 
             /** Call this from the main activity to send data to the remote device */
