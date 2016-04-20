@@ -1,67 +1,53 @@
 package com.ninjapiratestudios.trackercamera;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 
 public class Setup extends Activity {
 	
 	private final String TAG = "BluetoothLog";//To isolate
-
-    private Thread setupPage;
+    long start, elapsed;
+    Thread setupThread;
+    Context context;
+   //BT_Application application = ((BT_Application)this.getApplicationContext());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.content_setup);
+        context = this.getApplicationContext();
 
         if(((BT_Application)this.getApplicationContext()).mBluetooth.startBluetooth())
             ((BT_Application)this.getApplicationContext()).mBluetooth.discover_helper();
         else
             alertUser();
 
-        setupPage = new Thread() {
+        setupThread = new Thread() {
             @Override
             public void run() {
-                try {
-                    super.run();
-                    sleep(20000);
-                } catch (Exception e) {
-
-                }finally {
-                    goTo_videoActivity();
-                    //alertUser();
+                start = System.currentTimeMillis();
+                elapsed = 0;
+                while(!((BT_Application)context).mBluetooth.isConnected() && elapsed < 20){
+                    elapsed = (System.currentTimeMillis() - start)/1000;
+                    Log.i(TAG, "Time: " + elapsed);
                 }
+                goToVideoActivity();
             }
         };
-        setupPage.start();
-
+        setupThread.start();
     }
 
     public void alertUser(){
-        PopupDialog dialog = PopupDialog.newInstance();
+        PopupDialog dialog = PopupDialog.newBluetoothAlertDialog();
         dialog.show(getFragmentManager(), PopupDialog.FRAGMENT_TAG);
     }
-    public void goTo_videoActivity(){
+    public void goToVideoActivity(){
         if(((BT_Application)this.getApplicationContext()).mBluetooth.isConnected()) {
                 new Timer().schedule(new TimerTask() {
                     @Override

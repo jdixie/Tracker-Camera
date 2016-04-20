@@ -37,14 +37,14 @@ public class PopupDialog extends DialogFragment {
      * @param cameraRecorder The object responsible for all camera operations.
      * @return A new instance of this class.
      */
-    public static PopupDialog newInstance(CameraRecorder cameraRecorder) {
+    public static PopupDialog newFileNameDialog(CameraRecorder cameraRecorder) {
         PopupDialog popupDialog = new PopupDialog();
         popupDialog.type = DialogType.FILE_NAME_DIALOG;
         popupDialog.cameraRecorder = cameraRecorder;
         return popupDialog;
     }
 
-    public static PopupDialog newInstance(){
+    public static PopupDialog newBluetoothAlertDialog(){
         PopupDialog popupDialog = new PopupDialog();
         popupDialog.type = DialogType.BLUETOOTH_ALERT;
         return popupDialog;
