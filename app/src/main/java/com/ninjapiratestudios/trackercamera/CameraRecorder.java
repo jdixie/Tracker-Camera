@@ -49,7 +49,7 @@ public class CameraRecorder {
      * Displays a FileNameDialog to the user.
      */
     public void displayFileNameDialog() {
-        PopupDialog dialog = PopupDialog.newInstance(this);
+        PopupDialog dialog = PopupDialog.newFileNameDialog(this);
         dialog.show(activity.getFragmentManager(), PopupDialog.FRAGMENT_TAG);
     }
 

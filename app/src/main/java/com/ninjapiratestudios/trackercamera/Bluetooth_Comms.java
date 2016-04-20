@@ -9,8 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,14 +22,13 @@ import java.util.UUID;
  */
 public class Bluetooth_Comms {
     private final String TAG = "Bluetooth_Comms";
-    ArrayList<BluetoothDevice> mArrayAdapter = new ArrayList<>();
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice raspberryPi2;
-    //EditText degree;
+    boolean sendBool = false;
     String degree;
     private Boolean connected = false;
-
     public Context ctx;
+
 
     public Bluetooth_Comms(Context context){
         ctx = context;
@@ -89,13 +86,11 @@ public class Bluetooth_Comms {
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     // Get the BluetoothDevice object from the Intent
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // Add the name and address to an array adapter to show in a ListView
                     if (device.getAddress().equals("00:15:83:09:16:B0")) {//Jalen
 //                    if (device.getAddress().equals("5C:F3:70:71:A0:B5")) {//Raspberie pi
-//                            mArrayAdapter.add(device);
                         raspberryPi2 = device;
                         Log.d(TAG, "Device: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress());
-                        connecting(null);
+                        connecting();
                     }
 
                 }
@@ -110,18 +105,20 @@ public class Bluetooth_Comms {
     }
 
 
-    public void connecting(View view) {
+    public void connecting() {
         new ConnectThread(raspberryPi2).start();
     }
-    boolean sendBool = false;
 
-    public void rotate(int deg){
-        degree = "" + deg;
-    }
-
-    public void sendMethod() {
+    public String rotate(int deg){
+        if(deg < 0){
+            degree = deg + "-b";
+        }else{
+            degree = deg + "-f";
+        }
         sendBool = true;
+        return degree;
     }
+
 
     /**
      * This threaded class connects the devices together via a uuid. The device will be the
