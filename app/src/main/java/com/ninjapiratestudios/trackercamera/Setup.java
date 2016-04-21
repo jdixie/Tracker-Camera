@@ -12,35 +12,32 @@ import java.util.TimerTask;
 public class Setup extends Activity {
 	
 	private final String TAG = "BluetoothLog";//To isolate
-    long start, elapsed;
-    Thread setupThread;
-    Context context;
-   //BT_Application application = ((BT_Application)this.getApplicationContext());
+   //BTApplication application = ((BTApplication)this.getApplicationContext());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_setup);
+        final Context context;
         context = this.getApplicationContext();
 
-        if(((BT_Application)this.getApplicationContext()).mBluetooth.startBluetooth())
-            ((BT_Application)this.getApplicationContext()).mBluetooth.discover_helper();
+        if(((BTApplication)this.getApplicationContext()).mBluetooth.startBluetooth())
+            ((BTApplication)this.getApplicationContext()).mBluetooth.discover_helper();
         else
             alertUser();
 
-        setupThread = new Thread() {
+        new Thread() {
             @Override
             public void run() {
-                start = System.currentTimeMillis();
-                elapsed = 0;
-                while(!((BT_Application)context).mBluetooth.isConnected() && elapsed < 20){
+                long start = System.currentTimeMillis();
+                long elapsed = 0;
+                while(!((BTApplication)context).mBluetooth.isConnected() && elapsed < 20){
                     elapsed = (System.currentTimeMillis() - start)/1000;
                     Log.i(TAG, "Time: " + elapsed);
                 }
                 goToVideoActivity();
             }
-        };
-        setupThread.start();
+        }.start();
     }
 
     public void alertUser(){
@@ -48,7 +45,7 @@ public class Setup extends Activity {
         dialog.show(getFragmentManager(), PopupDialog.FRAGMENT_TAG);
     }
     public void goToVideoActivity(){
-        if(((BT_Application)this.getApplicationContext()).mBluetooth.isConnected()) {
+        if(((BTApplication)this.getApplicationContext()).mBluetooth.isConnected()) {
                 new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {

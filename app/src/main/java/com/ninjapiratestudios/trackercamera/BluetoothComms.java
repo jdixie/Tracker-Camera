@@ -20,8 +20,8 @@ import java.util.UUID;
 /**
  * Created by Jalen on 4/17/2016.
  */
-public class Bluetooth_Comms {
-    private final String TAG = "Bluetooth_Comms";
+public class BluetoothComms {
+    private final String TAG = "BluetoothComms";
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice raspberryPi2;
     boolean sendBool = false;
@@ -29,8 +29,7 @@ public class Bluetooth_Comms {
     private Boolean connected = false;
     public Context ctx;
 
-
-    public Bluetooth_Comms(Context context){
+    public BluetoothComms(Context context){
         ctx = context;
     }
 
