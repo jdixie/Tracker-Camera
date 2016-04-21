@@ -37,6 +37,7 @@ public class VideoActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_init);
 
         // Setup PagerAdapter for swiping functionality
@@ -44,6 +45,8 @@ public class VideoActivity extends FragmentActivity implements
         mViewPager = (ViewPager) findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
+
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(45);
 
         Overlay.setupGraphic(this);
         addContentView(Overlay.getGraphic(),
