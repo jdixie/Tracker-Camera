@@ -85,8 +85,9 @@ public class BluetoothComms {
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     // Get the BluetoothDevice object from the Intent
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    if (device.getAddress().equals("00:15:83:09:16:B0")) {//Jalen
-//                    if (device.getAddress().equals("5C:F3:70:71:A0:B5")) {//Raspberie pi
+//                    if (device.getAddress().equals("AC:7B:A1:70:A1:60")) {//Ben
+//                    if(device.getName().equals("DESKTOP-RN2JCAS")) {
+                      if (device.getAddress().equals("5C:F3:70:71:A0:B5")) {//Raspberie pi
                         raspberryPi2 = device;
                         Log.d(TAG, "Device: " + raspberryPi2.getName() + "\n" + raspberryPi2.getAddress());
                         connecting();
