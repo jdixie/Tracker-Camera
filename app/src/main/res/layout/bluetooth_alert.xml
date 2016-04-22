@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18dip"
+        android:text="Error, bluetooth connection not established!"
+        android:gravity="center"
+        android:id="@+id/btError_textView" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Okay"
+        android:id="@+id/btError_Button"
+        android:layout_below="@+id/btError_textView"
+        android:layout_centerHorizontal="true"/>
+</LinearLayout>
