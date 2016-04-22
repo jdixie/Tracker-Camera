@@ -67,7 +67,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder
         int size = frameWidth * frameHeight;
         size = size * ImageFormat.getBitsPerPixel(params.getPreviewFormat()) / 8;
 
-        analyzer = new Analyzer(frameWidth, frameHeight);
+        analyzer = new Analyzer(frameWidth, frameHeight, params);
 
         buffer = new byte[size];
         Log.d("", "Created callback buffer of size (bytes): " + size);

@@ -46,7 +46,7 @@ public class VideoActivity extends FragmentActivity implements
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
 
-        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(45);
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(900);
 
         Overlay.setupGraphic(this);
         addContentView(Overlay.getGraphic(),
