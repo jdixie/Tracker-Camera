@@ -168,15 +168,22 @@ public class Analyzer extends Thread{
                 }
             }
 
-            int locationAsPercent = (int)((lastTrackedCentroid.x / (double)frameWidth) * 100);
+
+            int locationAsPercent = (int)((lastTrackedCentroid.x / (double)thetaH) * 100);
 
             if(Math.abs(locationAsPercent - 50) < EPSILON){
-
-                if(locationAsPercent > 60) {
-
+            int zoom = params.getZoomRatios().get(params.getZoom()).intValue();
+            Camera.Size sz = params.getPreviewSize();
+            double aspect = (double) sz.width / (double) sz.height;
+            double thetaV = Math.toRadians(params.getVerticalViewAngle());
+            double thetaH = 2d * Math.atan(aspect * Math.tan(thetaV / 2.0));
+            thetaV = (2d * Math.atan(100d * Math.tan(thetaV / 2d) / zoom))/(Math.PI)*180;
+            thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom))/(Math.PI)*180;
+               if(locationAsPercent > 60) {
+                   //Bluetooth.turnRight(locationAsPercent/100*thetaH
                 }
                 else {
-
+                   //Bluetooth.turnLeft(locationAsPercent/100*thetaH
                 }
             }
 
