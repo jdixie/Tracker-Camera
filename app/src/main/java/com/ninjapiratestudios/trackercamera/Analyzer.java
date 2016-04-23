@@ -183,10 +183,10 @@ public class Analyzer extends Thread{
             double thetaH = 2d * Math.atan(aspect * Math.tan(thetaV / 2.0));
             //thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom))/(Math.PI)*180;
                if(locationAsPercent > 60) {
-                   activity.turnRight((int) (locationAsPercent/100*thetaH));
+                   activity.turnRight((int) (Math.abs (locationAsPercent/100*thetaH) - (.5*thetaH)));
                 }
                 else {
-                   activity.turnLeft((int) (locationAsPercent/100*thetaH));
+                   activity.turnLeft((int) (Math.abs ((locationAsPercent/100*thetaH))- (.5*thetaH)));
                 }
             }
 
