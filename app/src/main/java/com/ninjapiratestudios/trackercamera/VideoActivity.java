@@ -27,6 +27,7 @@ import java.util.Locale;
 public class VideoActivity extends FragmentActivity implements
         ItemFragment.OnListFragmentInteractionListener, VideoFragment.OnVideoAddedListener{
     public final static String LOG_TAG = "VIDEO_ACTIVITY";
+    private boolean overlayThreadRunning = true;
     private ViewPager mViewPager;
     private boolean intentAppExit; // Prevents release of camera resources
     private ImageButton recordButton;
@@ -36,6 +37,7 @@ public class VideoActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_init);
 
         // Setup PagerAdapter for swiping functionality
@@ -44,6 +46,8 @@ public class VideoActivity extends FragmentActivity implements
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
 
+
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(900);
         Overlay.setupGraphic(this);
         addContentView(Overlay.getGraphic(),
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
@@ -60,6 +64,7 @@ public class VideoActivity extends FragmentActivity implements
         }
 
         //every 100 milliseconds update overlay draw
+        overlayThreadRunning = true;
         overlayHelper = new OverlayThread();
         overlayHelper.start();
     }
@@ -67,7 +72,8 @@ public class VideoActivity extends FragmentActivity implements
     @Override
     protected void onPause(){
         super.onPause();
-        overlayHelper.interrupt();
+        //overlayHelper.interrupt();
+        overlayThreadRunning = false;
         overlayHelper = null;
         Log.i(LOG_TAG, "Thread Interrupt called");
     }
@@ -187,9 +193,10 @@ public class VideoActivity extends FragmentActivity implements
     private class OverlayThread extends Thread {
         @Override
         public void run(){
-            while(!interrupted()) {
+            while(overlayThreadRunning) {
+                Log.i(LOG_TAG, "Overlay Thread Running!");
                 try {
-                    Log.i(LOG_TAG, "Overlay Thread Running!");
+
                     synchronized (this) {
                         wait(50);
 
@@ -205,5 +212,15 @@ public class VideoActivity extends FragmentActivity implements
                 }
             }
         }
+    }
+
+    public void turnLeft(int amount)
+    {
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(-amount);
+    }
+
+    public void turnRight(int amount)
+    {
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(amount);
     }
 }

@@ -49,8 +49,8 @@ public class CameraRecorder {
      * Displays a FileNameDialog to the user.
      */
     public void displayFileNameDialog() {
-        FileNameDialog dialog = FileNameDialog.newInstance(this);
-        dialog.show(activity.getFragmentManager(), FileNameDialog.FRAGMENT_TAG);
+        PopupDialog dialog = PopupDialog.newFileNameDialog(this);
+        dialog.show(activity.getFragmentManager(), PopupDialog.FRAGMENT_TAG);
     }
 
     /**
@@ -210,8 +210,8 @@ public class CameraRecorder {
     /**
      *
      */
-    public void cameraPreviewSetup(FrameLayout frameLayout) {
-        cameraPreview = new CameraPreview(activity, camera);
+    public void cameraPreviewSetup(FrameLayout frameLayout, VideoActivity vidActivity) {
+        cameraPreview = new CameraPreview(activity, camera, vidActivity);
         frameLayout.addView(cameraPreview);
         Log.i(LOG_TAG, "Camera preview added to FrameLayout.");
     }

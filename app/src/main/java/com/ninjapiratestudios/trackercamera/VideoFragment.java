@@ -26,6 +26,7 @@ public class VideoFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.i(LOG_TAG, "onAttach()");
         vAListener = (OnVideoAddedListener) context;
         activity = (VideoActivity)getActivity();
         // Prepare camera and OpenGL
@@ -39,7 +40,7 @@ public class VideoFragment extends Fragment {
         LinearLayout buttonLL = new LinearLayout(getActivity());
 
         // Add CameraPreview and Record Button to FrameLayout
-        cameraRecorder.cameraPreviewSetup(preview);
+        cameraRecorder.cameraPreviewSetup(preview, activity);
         activity.setRecordButton(new ImageButton(getActivity()));
         ImageButton recordButton = activity.getRecordButton();
         recordButton.setImageResource(R.drawable.record);
@@ -79,6 +80,7 @@ public class VideoFragment extends Fragment {
         if(!activity.isIntentAppExit()) {
             cameraRecorder.releaseMediaResource();
             cameraRecorder.releaseCameraResource();
+            activity.finish();
         }
         Log.i(LOG_TAG, "onPause()");
     }

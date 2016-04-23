@@ -3,6 +3,7 @@ package com.ninjapiratestudios.trackercamera;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.hardware.Camera;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.LoaderCallbackInterface;
@@ -53,6 +54,9 @@ public class Analyzer extends Thread{
     //used to convert android camera preview frame to OpenCV usable image
     CameraAccessFrame cameraAccessFrame;
 
+    //Used for dimensions calculations
+    Camera.Parameters params;
+
     //storage for preview dimensions
     private int frameWidth, frameHeight;
     Point center;
@@ -67,9 +71,12 @@ public class Analyzer extends Thread{
 
     Point lastTrackedCentroid = null;
 
+    // provides a reference to the main activity
+    VideoActivity activity;
+
     private final int EPSILON = 10;
 
-    public Analyzer(int w, int h) {
+    public Analyzer(int w, int h, Camera.Parameters params, VideoActivity activity) {
         frameWidth = w;
         frameHeight = h;
         center = new Point(frameWidth/2.0, frameHeight/2.0);
@@ -83,6 +90,8 @@ public class Analyzer extends Thread{
         Mat frame = new Mat(frameHeight + (frameHeight / 2), frameWidth, CvType.CV_8UC1);
         cameraAccessFrame = new CameraAccessFrame(frame, frameWidth, frameHeight);
         centroids = new ArrayList<Point>();
+        this.params = params;
+        this.activity = activity;
     }
 
     public void onCameraViewStopped() {
@@ -163,14 +172,21 @@ public class Analyzer extends Thread{
                 }
             }
 
-            int locationAsPercent = (int)((lastTrackedCentroid.x / (double)frameWidth) * 100);
+
+            int locationAsPercent = (int)((lastTrackedCentroid.x / (double) frameWidth) * 100);
 
             if(Math.abs(locationAsPercent - 50) < EPSILON){
-                if(locationAsPercent > 60) {
-                    //turn left
+            int zoom = params.getZoomRatios().get(params.getZoom()).intValue();
+            Camera.Size sz = params.getPreviewSize();
+            double aspect = (double) sz.width / (double) sz.height;
+            double thetaV = Math.toRadians(params.getVerticalViewAngle());
+            double thetaH = 2d * Math.atan(aspect * Math.tan(thetaV / 2.0));
+            thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom))/(Math.PI)*180;
+               if(locationAsPercent > 60) {
+                   activity.turnRight((int) (Math.abs (locationAsPercent/100*thetaH) - (.5*thetaH)));
                 }
                 else {
-                    //turn right
+                   activity.turnLeft((int) (Math.abs ((locationAsPercent/100*thetaH))- (.5*thetaH)));
                 }
             }
 
