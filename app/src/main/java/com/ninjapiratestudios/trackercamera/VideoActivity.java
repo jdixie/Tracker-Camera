@@ -47,7 +47,7 @@ public class VideoActivity extends FragmentActivity implements
         mViewPager.setAdapter(pagerAdapter);
 
 
-        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(900);
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(360);
         Overlay.setupGraphic(this);
         addContentView(Overlay.getGraphic(),
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
@@ -194,7 +194,7 @@ public class VideoActivity extends FragmentActivity implements
         @Override
         public void run(){
             while(overlayThreadRunning) {
-                Log.i(LOG_TAG, "Overlay Thread Running!");
+                //Log.i(LOG_TAG, "Overlay Thread Running!");
                 try {
 
                     synchronized (this) {
