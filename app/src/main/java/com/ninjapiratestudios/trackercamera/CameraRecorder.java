@@ -210,8 +210,8 @@ public class CameraRecorder {
     /**
      *
      */
-    public void cameraPreviewSetup(FrameLayout frameLayout) {
-        cameraPreview = new CameraPreview(activity, camera);
+    public void cameraPreviewSetup(FrameLayout frameLayout, VideoActivity vidActivity) {
+        cameraPreview = new CameraPreview(activity, camera, vidActivity);
         frameLayout.addView(cameraPreview);
         Log.i(LOG_TAG, "Camera preview added to FrameLayout.");
     }

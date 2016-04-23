@@ -40,7 +40,7 @@ public class VideoFragment extends Fragment {
         LinearLayout buttonLL = new LinearLayout(getActivity());
 
         // Add CameraPreview and Record Button to FrameLayout
-        cameraRecorder.cameraPreviewSetup(preview);
+        cameraRecorder.cameraPreviewSetup(preview, activity);
         activity.setRecordButton(new ImageButton(getActivity()));
         ImageButton recordButton = activity.getRecordButton();
         recordButton.setImageResource(R.drawable.record);

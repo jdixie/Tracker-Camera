@@ -71,9 +71,12 @@ public class Analyzer extends Thread{
 
     Point lastTrackedCentroid = null;
 
+    // provides a reference to the main activity
+    VideoActivity activity;
+
     private final int EPSILON = 10;
 
-    public Analyzer(int w, int h, Camera.Parameters params) {
+    public Analyzer(int w, int h, Camera.Parameters params, VideoActivity activity) {
         frameWidth = w;
         frameHeight = h;
         center = new Point(frameWidth/2.0, frameHeight/2.0);
@@ -88,6 +91,7 @@ public class Analyzer extends Thread{
         cameraAccessFrame = new CameraAccessFrame(frame, frameWidth, frameHeight);
         centroids = new ArrayList<Point>();
         this.params = params;
+        this.activity = activity;
     }
 
     public void onCameraViewStopped() {
@@ -169,7 +173,7 @@ public class Analyzer extends Thread{
             }
 
 
-            int locationAsPercent = (int)((lastTrackedCentroid.x / (double)thetaH) * 100);
+            int locationAsPercent = (int)((lastTrackedCentroid.x / (double) frameWidth) * 100);
 
             if(Math.abs(locationAsPercent - 50) < EPSILON){
             int zoom = params.getZoomRatios().get(params.getZoom()).intValue();
@@ -177,13 +181,12 @@ public class Analyzer extends Thread{
             double aspect = (double) sz.width / (double) sz.height;
             double thetaV = Math.toRadians(params.getVerticalViewAngle());
             double thetaH = 2d * Math.atan(aspect * Math.tan(thetaV / 2.0));
-            thetaV = (2d * Math.atan(100d * Math.tan(thetaV / 2d) / zoom))/(Math.PI)*180;
-            thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom))/(Math.PI)*180;
+            //thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom))/(Math.PI)*180;
                if(locationAsPercent > 60) {
-                   //Bluetooth.turnRight(locationAsPercent/100*thetaH
+                   activity.turnRight((int) (locationAsPercent/100*thetaH));
                 }
                 else {
-                   //Bluetooth.turnLeft(locationAsPercent/100*thetaH
+                   activity.turnLeft((int) (locationAsPercent/100*thetaH));
                 }
             }
 
