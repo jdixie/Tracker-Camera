@@ -5,9 +5,7 @@ import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.ninjapiratestudios.trackercamera.CameraRecorder;
 import com.ninjapiratestudios.trackercamera.FileNameDialog;
-import com.ninjapiratestudios.trackercamera.VideoActivity;
 
 import junit.framework.Assert;
 

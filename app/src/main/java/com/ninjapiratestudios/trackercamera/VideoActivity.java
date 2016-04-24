@@ -3,6 +3,8 @@ package com.ninjapiratestudios.trackercamera;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -33,6 +35,8 @@ public class VideoActivity extends FragmentActivity implements
     private ImageButton recordButton;
     private boolean stopImage;
     Thread overlayHelper;
+    PowerManager powerManager;
+    WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +51,11 @@ public class VideoActivity extends FragmentActivity implements
         mViewPager.setAdapter(pagerAdapter);
 
 
-        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(900);
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(360);
         Overlay.setupGraphic(this);
         addContentView(Overlay.getGraphic(),
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+
     }
 
     @Override
@@ -67,6 +72,11 @@ public class VideoActivity extends FragmentActivity implements
         overlayThreadRunning = true;
         overlayHelper = new OverlayThread();
         overlayHelper.start();
+
+        powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK,
+                "MyWakelockTag");
+        wakeLock.acquire();
     }
 
     @Override
@@ -76,6 +86,7 @@ public class VideoActivity extends FragmentActivity implements
         overlayThreadRunning = false;
         overlayHelper = null;
         Log.i(LOG_TAG, "Thread Interrupt called");
+        wakeLock.release();
     }
 
     /**
@@ -194,7 +205,7 @@ public class VideoActivity extends FragmentActivity implements
         @Override
         public void run(){
             while(overlayThreadRunning) {
-                Log.i(LOG_TAG, "Overlay Thread Running!");
+                //Log.i(LOG_TAG, "Overlay Thread Running!");
                 try {
 
                     synchronized (this) {
@@ -216,7 +227,7 @@ public class VideoActivity extends FragmentActivity implements
 
     public void turnLeft(int amount)
     {
-        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(-amount);
+        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(amount);
     }
 
     public void turnRight(int amount)

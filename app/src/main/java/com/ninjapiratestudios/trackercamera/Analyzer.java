@@ -1,6 +1,7 @@
 package com.ninjapiratestudios.trackercamera;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.hardware.Camera;
@@ -37,6 +38,8 @@ public class Analyzer extends Thread{
     private boolean isColorSelected = false;
     //Mat used for frame analysis
     private Mat rgba;
+
+    public static boolean wait = false;
 
     //selected color variables
     private Scalar blobColorRgba;
@@ -128,6 +131,7 @@ public class Analyzer extends Thread{
 
     //analyze frame for contours based on the color(s)
     public void analyze(){
+        Date now = new Date();
         frameAnalyzed = false;
 
         if (isColorSelected) {
@@ -173,23 +177,35 @@ public class Analyzer extends Thread{
             }
 
 
-            int locationAsPercent = (int)((lastTrackedCentroid.x / (double) frameWidth) * 100);
-
-            if(Math.abs(locationAsPercent - 50) < EPSILON){
-            int zoom = params.getZoomRatios().get(params.getZoom()).intValue();
-            Camera.Size sz = params.getPreviewSize();
-            double aspect = (double) sz.width / (double) sz.height;
-            double thetaV = Math.toRadians(params.getVerticalViewAngle());
-            double thetaH = 2d * Math.atan(aspect * Math.tan(thetaV / 2.0));
-            //thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom))/(Math.PI)*180;
-               if(locationAsPercent > 60) {
-                   activity.turnRight((int) (Math.abs (locationAsPercent/100*thetaH) - (.5*thetaH)));
+            int locationAsPercent = (int)((lastTrackedCentroid.x / (double) frameWidth) * 100d);
+            Log.i("Loc", "" + locationAsPercent);
+            if(!wait) {
+                if (Math.abs(locationAsPercent - 50) > EPSILON) {
+                    int zoom = params.getZoomRatios().get(params.getZoom()).intValue();
+                    Camera.Size sz = params.getPreviewSize();
+                    double aspect = (double) sz.width / (double) sz.height;
+                    double thetaV = Math.toRadians(params.getVerticalViewAngle());
+                    double thetaH = 2d * Math.atan(aspect * Math.tan(thetaV / 2.0));
+                    //double thetaH = params.getHorizontalViewAngle();
+                    thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom)) / (Math.PI) * 180d;
+                    Date sendingAt = new Date();
+                    Log.i("Analyze time", (sendingAt.getTime() - now.getTime() + "ms; ThetaH: " + thetaH));
+                    if (locationAsPercent > 60) {
+                        activity.turnRight((int) -(Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))/2d));
+                        Log.i("Spin", "" + (int) -(Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))));
+                    } else {
+                        activity.turnLeft((int) (Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))/2d));
+                        Log.i("Spin", "" + (int) (Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))));
+                    }
+                    //wait = true;
+                /*try {
+                    Thread.sleep(1000);
                 }
-                else {
-                   activity.turnLeft((int) (Math.abs ((locationAsPercent/100*thetaH))- (.5*thetaH)));
+                catch(InterruptedException e){
+
+                }*/
                 }
             }
-
         }
 
 

@@ -33,7 +33,7 @@ public class Setup extends Activity {
                 long elapsed = 0;
                 while(!((BTApplication)context).mBluetooth.isConnected() && elapsed < 20){
                     elapsed = (System.currentTimeMillis() - start)/1000;
-                    Log.i(TAG, "Time: " + elapsed);
+                    //Log.i(TAG, "Time: " + elapsed);
                 }
                 goToVideoActivity();
             }
