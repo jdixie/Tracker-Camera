@@ -7,6 +7,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import java.io.IOException;
@@ -111,13 +113,38 @@ public class BluetoothComms {
 
     public String rotate(int deg){
         if(deg < 0){
-            degree = deg + "-b";
+            degree = -deg + "-b";
         }else{
             degree = deg + "-f";
         }
         sendBool = true;
         return degree;
     }
+
+
+    /**
+     * This message handler is for reading input data sent from the raspberry pi server.
+     * args1 is the beginning of the message
+     * args2 is the ending of the message in the message stream coming in.
+     * It gets converted into a string (can change later) then substrings the message out
+     */
+    public static final Handler messageHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            byte[] writeBuf = (byte[]) msg.obj;
+            int begin = (int) msg.arg1;
+            int end = (int) msg.arg2;
+            switch (msg.what) {
+                case 1:
+                    String writeMessage = new String(writeBuf);
+                    writeMessage = writeMessage.substring(begin, end);
+                    Log.d("message was", "S:" + writeMessage + "");
+                    break;
+            }
+        }
+    };
+
+
 
 
     /**
@@ -200,7 +227,7 @@ public class BluetoothComms {
 
             public void run() {
                 byte[] buffer = new byte[1024];  // buffer store for the stream
-                int bytes; // bytes returned from read()
+                int bytes = -1; // bytes returned from read()
                 // Keep listening to the InputStream until an exception occurs
                 while (true){
 
@@ -214,11 +241,11 @@ public class BluetoothComms {
                         //degree.clearComposingText();
                         sendBool=false;
                     }
-                    try {
+                    /*try {
                         sleep(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-                    }
+                    }*/
 
                 }
 
