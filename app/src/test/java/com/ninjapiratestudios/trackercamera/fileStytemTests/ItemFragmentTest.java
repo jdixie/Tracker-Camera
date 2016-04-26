@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Environment;
 
+import com.ninjapiratestudios.trackercamera.BaseTest;
 import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
 
 import org.junit.Before;
@@ -23,7 +24,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @PrepareForTest(ItemFragment.class)
 @RunWith(PowerMockRunner.class)
-public class ItemFragmentTest extends BaseTest{
+public class ItemFragmentTest extends BaseTest {
     private ItemFragment itemFragment;
 
     @Before
