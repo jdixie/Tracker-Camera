@@ -21,7 +21,7 @@ public class Setup extends Activity {
         final Context context;
         context = this.getApplicationContext();
 
-        if(((BTApplication)this.getApplicationContext()).mBluetooth.startBluetooth())
+        /*if(((BTApplication)this.getApplicationContext()).mBluetooth.startBluetooth())
             ((BTApplication)this.getApplicationContext()).mBluetooth.discover_helper();
         else
             alertUser();
@@ -37,7 +37,8 @@ public class Setup extends Activity {
                 }
                 goToVideoActivity();
             }
-        }.start();
+        }.start();*/
+        debugStartVideoActivity();
     }
 
     public void alertUser(){
@@ -56,6 +57,11 @@ public class Setup extends Activity {
                 }, 2000);
         }else
             alertUser();
+    }
+
+    public void debugStartVideoActivity(){
+        Intent i = new Intent(Setup.this, VideoActivity.class);
+        startActivity(i);
     }
 
 /*

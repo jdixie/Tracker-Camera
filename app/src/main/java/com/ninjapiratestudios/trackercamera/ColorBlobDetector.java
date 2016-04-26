@@ -14,6 +14,8 @@ import org.opencv.imgproc.Imgproc;
 //TODO: expand this past tutorial to encompass multiple OpenCV contours based on different colors discovered from algorithm
 public class ColorBlobDetector {
     //bounds for range checking in HSV color space
+    //private Scalar[] lowerBound = new Scalar[8];
+    //private Scalar[] upperBound = new Scalar[8];
     private Scalar lowerBound = new Scalar(0);
     private Scalar upperBound = new Scalar(0);
     //smallest area to be considered for OpenCV contour as percentage of total image
