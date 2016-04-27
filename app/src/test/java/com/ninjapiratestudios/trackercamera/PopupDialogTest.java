@@ -1,4 +1,4 @@
-package com.ninjapiratestudios.trackercamera.fileStytemTests;
+package com.ninjapiratestudios.trackercamera;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
@@ -6,9 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-
-import com.ninjapiratestudios.trackercamera.FileNameDialog;
-import com.ninjapiratestudios.trackercamera.R;
 
 import junit.framework.Assert;
 
@@ -26,15 +23,15 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.times;
 
 /**
- * Unit tests for FileNameDialog.java.
+ * Unit tests for PopupDialog.java.
  *
  * @author John Qualls
  * @version 3/5/2016
  */
-@PrepareForTest(FileNameDialog.class)
+@PrepareForTest(PopupDialog.class)
 @RunWith(PowerMockRunner.class)
-public class FileNameDialogTest extends BaseTest {
-    private FileNameDialog dialog;
+public class PopupDialogTest extends BaseTest {
+    private PopupDialog dialog;
 
     private enum TestName {
         LAYOUT,
@@ -44,7 +41,7 @@ public class FileNameDialogTest extends BaseTest {
     @Before
     public void setup() {
         try {
-            dialog = Mockito.spy(new FileNameDialog());
+            dialog = Mockito.spy(new PopupDialog());
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_BEFORE_ERROR + e.getMessage());
         }
@@ -95,20 +92,20 @@ public class FileNameDialogTest extends BaseTest {
         LayoutInflater inflater = Mockito.mock(LayoutInflater.class);
         ViewGroup container = Mockito.mock(ViewGroup.class);
         View view = Mockito.mock(View.class);
-        FileNameDialog.ButtonClick listener = Mockito.mock(FileNameDialog.ButtonClick.class);
+        PopupDialog.ButtonClick listener = Mockito.mock(PopupDialog.ButtonClick.class);
 
         // Test setup
         try {
             Mockito.when(inflater.inflate(anyInt(), any(ViewGroup.class),
                     anyBoolean())).thenReturn(view);
-            Mockito.when(view.findViewById(R.id.fn_dialog_save_button))
+            Mockito.when(view.findViewById(R.id.fn_dialog_record_button))
                     .thenReturn(view);
             Mockito.when(view.findViewById(R.id.fn_dialog_cancel_button))
                     .thenReturn(view);
             // Just return dummy EditText for test to work
             Mockito.when(view.findViewById(R.id.fn_dialog_file_name))
                     .thenReturn(Mockito.mock(EditText.class));
-            PowerMockito.whenNew(FileNameDialog.ButtonClick.class)
+            PowerMockito.whenNew(PopupDialog.ButtonClick.class)
                     .withNoArguments().thenReturn(listener);
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_SETUP_ERROR + e.getMessage());
@@ -128,7 +125,7 @@ public class FileNameDialogTest extends BaseTest {
                 Mockito.verify(inflater).inflate(R.layout
                         .fragment_file_name_dialog, container, false);
             } else if (TestName.LISTENERS == testName) {
-                Mockito.verify(view).findViewById(R.id.fn_dialog_save_button);
+                Mockito.verify(view).findViewById(R.id.fn_dialog_record_button);
                 Mockito.verify(view).findViewById(R.id.fn_dialog_cancel_button);
                 Mockito.verify(view, times(2)).setOnClickListener
                         (listener);

@@ -4,6 +4,10 @@
         "map": []
     },
     {
+        "outputFile": "C:\\Users\\Alton\\AndroidStudioProjects\\TrackerCamera\\master\\Tracker-Camera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "map": []
+    },
+    {
         "outputFile": "C:\\home\\benjamin\\Software_Engineering_Project\\Josh_Dixie\\Tracker-Camera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
         "map": []
     },
@@ -21,6 +25,10 @@
     },
     {
         "outputFile": "C:\\Users\\jjdixie\\AndroidStudioProjects\\CTCam\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
+        "map": []
+    },
+    {
+        "outputFile": "C:\\Users\\benbo\\Software_Engineering\\Tracker-Camera\\openCVLibrary310\\build\\intermediates\\res\\merged\\androidTest\\debug\\values\\values.xml",
         "map": []
     }
 ]

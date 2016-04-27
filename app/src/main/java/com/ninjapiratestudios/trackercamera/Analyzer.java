@@ -3,6 +3,7 @@ package com.ninjapiratestudios.trackercamera;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.hardware.Camera;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.LoaderCallbackInterface;
@@ -53,8 +54,12 @@ public class Analyzer extends Thread{
     //used to convert android camera preview frame to OpenCV usable image
     CameraAccessFrame cameraAccessFrame;
 
+    //Used for dimensions calculations
+    Camera.Parameters params;
+
     //storage for preview dimensions
     private int frameWidth, frameHeight;
+    Point center;
 
     //booleans for synchronization since I can't sync something happening on the GPU
     private boolean readyForFrame = false;
@@ -64,10 +69,17 @@ public class Analyzer extends Thread{
     List<MatOfPoint> contours;
     ArrayList<Point> centroids;
 
+    Point lastTrackedCentroid = null;
 
-    public Analyzer(int w, int h) {
+    // provides a reference to the main activity
+    VideoActivity activity;
+
+    private final int EPSILON = 10;
+
+    public Analyzer(int w, int h, Camera.Parameters params, VideoActivity activity) {
         frameWidth = w;
         frameHeight = h;
+        center = new Point(frameWidth/2.0, frameHeight/2.0);
         rgba = new Mat(frameHeight, frameWidth, CvType.CV_8UC4);
         detector = new ColorBlobDetector();
         spectrum = new Mat();
@@ -78,6 +90,8 @@ public class Analyzer extends Thread{
         Mat frame = new Mat(frameHeight + (frameHeight / 2), frameWidth, CvType.CV_8UC1);
         cameraAccessFrame = new CameraAccessFrame(frame, frameWidth, frameHeight);
         centroids = new ArrayList<Point>();
+        this.params = params;
+        this.activity = activity;
     }
 
     public void onCameraViewStopped() {
@@ -128,6 +142,7 @@ public class Analyzer extends Thread{
             centroids.clear();
             Overlay.toggleReady();
             Overlay.clearBlobs();
+
             for(int i = 0; i < contours.size(); i++){
                 moments = Imgproc.moments(contours.get(i));
                 p = new Point();
@@ -139,13 +154,59 @@ public class Analyzer extends Thread{
                 Overlay.addBlob(p);
             }
             Overlay.toggleReady();
+
+            if(lastTrackedCentroid == null){
+                Double shortestFromCenter = Double.POSITIVE_INFINITY;
+                for(Point t:centroids){
+                    if(distanceFromCenter(t) < shortestFromCenter){
+                        lastTrackedCentroid = t;
+                    }
+                }
+            }
+            else{
+                Double shortestFromLastCentroid = Double.POSITIVE_INFINITY;
+                for(Point t:centroids){
+                    if(distanceFromLastTrackedCentroid(t) < shortestFromLastCentroid){
+                        lastTrackedCentroid = t;
+                    }
+                }
+            }
+
+
+            int locationAsPercent = (int)((lastTrackedCentroid.x / (double) frameWidth) * 100);
+
+            if(Math.abs(locationAsPercent - 50) < EPSILON){
+            int zoom = params.getZoomRatios().get(params.getZoom()).intValue();
+            Camera.Size sz = params.getPreviewSize();
+            double aspect = (double) sz.width / (double) sz.height;
+            double thetaV = Math.toRadians(params.getVerticalViewAngle());
+            double thetaH = 2d * Math.atan(aspect * Math.tan(thetaV / 2.0));
+            //thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom))/(Math.PI)*180;
+               if(locationAsPercent > 60) {
+                   activity.turnRight((int) (Math.abs (locationAsPercent/100*thetaH) - (.5*thetaH)));
+                }
+                else {
+                   activity.turnLeft((int) (Math.abs ((locationAsPercent/100*thetaH))- (.5*thetaH)));
+                }
+            }
+
         }
 
-        //TODO: move the motor appropriately
+
+
 
         //get ready for a new frame
         readyForFrame = true;
         frameAnalyzed = true;
+    }
+
+    private double distanceFromCenter(Point p){
+        return Math.sqrt(Math.abs(center.x * center.x - p.x * p.x) + Math.abs(center.y * center.y - p.y * p.y));
+    }
+
+    private double distanceFromLastTrackedCentroid(Point p){
+        return Math.sqrt(Math.abs(lastTrackedCentroid.x * lastTrackedCentroid.x - p.x * p.x) +
+                Math.abs(lastTrackedCentroid.y * lastTrackedCentroid.y - p.y * p.y));
     }
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
