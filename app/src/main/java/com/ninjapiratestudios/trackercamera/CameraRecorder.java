@@ -26,7 +26,6 @@ public class CameraRecorder {
     private VideoActivity activity;
     private String fileName;
     private boolean recording;
-    private Overlay overlay;
 
     /**
      * Static factory method that gets a reference to the camera.

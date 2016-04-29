@@ -5,17 +5,13 @@ import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.ninjapiratestudios.trackercamera.CameraRecorder;
-import com.ninjapiratestudios.trackercamera.PopupDialog;
-import com.ninjapiratestudios.trackercamera.VideoActivity;
-
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
+import static org.powermock.api.mockito.PowerMockito.*;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -32,15 +28,14 @@ import org.powermock.reflect.Whitebox;
 public class CameraRecorderTest extends BaseTest {
     private enum TestName {
         GET_CAMERA,
-        GET_CAMERA_NULL,
-        SET_PREVIEW;
+        GET_CAMERA_NULL
     }
 
     private CameraRecorder cameraRecorder;
 
     @Before
     public void setup() {
-        cameraRecorder = PowerMockito.spy(new CameraRecorder());
+        cameraRecorder = spy(new CameraRecorder());
     }
 
     @Test
@@ -54,19 +49,14 @@ public class CameraRecorderTest extends BaseTest {
     }
 
     @Test
-    public void setPreviewTest() {
-        staticFactoryMethodTestHelper(TestName.SET_PREVIEW);
-    }
-
-    @Test
     public void displayPopupDialogTest() {
         VideoActivity activityMock = Mockito.mock(VideoActivity.class);
         FragmentManager expectedArg1 = Mockito.mock(FragmentManager.class);
         PopupDialog mockDialog = Mockito.mock(PopupDialog.class);
         // Test setup
         try {
-            PowerMockito.mockStatic(PopupDialog.class);
-            PowerMockito.when(PopupDialog.newFileNameDialog(cameraRecorder))
+            mockStatic(PopupDialog.class);
+            when(PopupDialog.newFileNameDialog(cameraRecorder))
                     .thenReturn(mockDialog);
             Whitebox.setInternalState(cameraRecorder, "activity", activityMock);
             Mockito.when(activityMock.getFragmentManager()).thenReturn
@@ -95,12 +85,14 @@ public class CameraRecorderTest extends BaseTest {
     public void startRecordingTest() {
         MediaRecorder mrMock = Mockito.mock(MediaRecorder.class);
         Camera cameraMock = Mockito.mock(Camera.class);
+        CameraPreview camPrevMock = Mockito.mock(CameraPreview.class);
         // Test setup
         try {
             Whitebox.setInternalState(cameraRecorder, "camera", cameraMock);
-            PowerMockito.doNothing().when(cameraRecorder, "setupCamera");
+            doNothing().when(cameraRecorder, "setupCamera");
             Whitebox.setInternalState(cameraRecorder, "mediaRecorder", mrMock);
-            PowerMockito.mockStatic(Log.class);
+            Whitebox.setInternalState(cameraRecorder, "cameraPreview", camPrevMock);
+            mockStatic(Log.class);
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_SETUP_ERROR + e.getMessage());
         }
@@ -115,9 +107,11 @@ public class CameraRecorderTest extends BaseTest {
         // Execute test
         try {
             Mockito.verify(cameraMock).unlock();
-            PowerMockito.verifyPrivate(cameraRecorder).invoke
+            verifyPrivate(cameraRecorder).invoke
                     ("setupCamera");
             Mockito.verify(mrMock).start();
+            Mockito.verify(cameraMock).reconnect();
+            Mockito.verify(camPrevMock).onStartRecord();
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_EXECUTE_ERROR + e.getMessage());
         }
@@ -126,16 +120,17 @@ public class CameraRecorderTest extends BaseTest {
 
     private void staticFactoryMethodTestHelper(TestName testName) {
         CameraRecorder actualInstance = null;
-        Camera camera = Mockito.mock(Camera.class);
+        Camera cameraMock = Mockito.mock(Camera.class);
 
         // Test setup
         try {
-            PowerMockito.whenNew(CameraRecorder.class).withNoArguments()
+            whenNew(CameraRecorder.class).withNoArguments()
                     .thenReturn(cameraRecorder);
-            PowerMockito.doNothing().when(cameraRecorder, "cameraPreviewSetup");
-            PowerMockito.mockStatic(Camera.class);
-            if (TestName.GET_CAMERA_NULL != testName) {
-                PowerMockito.when(Camera.open()).thenReturn(camera);
+            spy(CameraRecorder.class);
+            if (TestName.GET_CAMERA_NULL == testName) {
+                doReturn(null).when(CameraRecorder.class, "getCameraInstance");
+            } else {
+                doReturn(cameraMock).when(CameraRecorder.class, "getCameraInstance");
             }
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_SETUP_ERROR + e.getMessage());
@@ -155,9 +150,6 @@ public class CameraRecorderTest extends BaseTest {
                 Assert.assertEquals(cameraRecorder, actualInstance);
             } else if (TestName.GET_CAMERA_NULL == testName) {
                 Assert.assertNull(actualInstance);
-            } else if (TestName.SET_PREVIEW == testName) {
-                PowerMockito.verifyPrivate(cameraRecorder).invoke
-                        ("cameraPreviewSetup");
             }
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_EXECUTE_ERROR + e.getMessage());
