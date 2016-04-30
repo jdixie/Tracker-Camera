@@ -68,14 +68,14 @@ public class CameraRecorderTest extends BaseTest {
             Assert.fail(UNIT_TEST_SETUP_ERROR + e.getMessage());
         }
 
-        // Execute SUT
+        // SUT
         try {
             cameraRecorder.displayFileNameDialog();
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_SUT_ERROR + e.getMessage());
         }
 
-        // Execute test
+        // Test
         try {
             Mockito.verify(mockDialog).show(expectedArg1, PopupDialog
                     .FRAGMENT_TAG);
