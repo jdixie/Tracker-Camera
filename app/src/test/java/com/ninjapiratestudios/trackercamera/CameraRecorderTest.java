@@ -12,6 +12,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import static org.powermock.api.mockito.PowerMockito.*;
+import static org.junit.Assert.assertNull;
+
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -30,12 +33,12 @@ public class CameraRecorderTest extends BaseTest {
         GET_CAMERA,
         GET_CAMERA_NULL
     }
-
     private CameraRecorder cameraRecorder;
 
     @Before
     public void setup() {
         cameraRecorder = spy(new CameraRecorder());
+        PowerMockito.mockStatic(Log.class);
     }
 
     @Test
@@ -92,7 +95,6 @@ public class CameraRecorderTest extends BaseTest {
             doNothing().when(cameraRecorder, "setupCamera");
             Whitebox.setInternalState(cameraRecorder, "mediaRecorder", mrMock);
             Whitebox.setInternalState(cameraRecorder, "cameraPreview", camPrevMock);
-            mockStatic(Log.class);
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_SETUP_ERROR + e.getMessage());
         }
@@ -117,6 +119,38 @@ public class CameraRecorderTest extends BaseTest {
         }
     }
 
+    @Test
+    public void releaseCameraResourceTest() {
+        // Setup
+        CameraPreview camPrevMock = Mockito.mock(CameraPreview.class);
+        Camera cameraMock = Mockito.mock(Camera.class);
+        Whitebox.setInternalState(cameraRecorder, "camera", cameraMock);
+        Whitebox.setInternalState(cameraRecorder, "cameraPreview", camPrevMock);
+
+        // SUT
+        cameraRecorder.releaseCameraResource();
+
+        // Test
+        Mockito.verify(cameraMock).lock();
+        Mockito.verify(cameraMock).stopPreview();
+        Mockito.verify(cameraMock).release();
+        assertNull(Whitebox.getInternalState(cameraRecorder, "camera"));
+    }
+
+    @Test
+    public void releaseMediaResourceTest() {
+        // Setup
+        MediaRecorder mrMock = Mockito.mock(MediaRecorder.class);
+        Whitebox.setInternalState(cameraRecorder, "mediaRecorder", mrMock);
+
+        // SUT
+        cameraRecorder.releaseMediaResource();
+
+        // Test
+        Mockito.verify(mrMock).reset();
+        Mockito.verify(mrMock).release();
+        assertNull(Whitebox.getInternalState(cameraRecorder, "mediaRecorder"));
+    }
 
     private void staticFactoryMethodTestHelper(TestName testName) {
         CameraRecorder actualInstance = null;
