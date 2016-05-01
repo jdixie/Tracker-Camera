@@ -190,7 +190,7 @@ public class Analyzer extends Thread{
             }
 
             //find multi-color groupings within 10% of a screen slice
-            int groupSize = 1;
+            /*int groupSize = 1;
             ArrayList<Integer> grouping = new ArrayList<Integer>();
             for(int i = 0; i < numColors - 1; i++){
                 int tempSize = 1;
@@ -223,6 +223,86 @@ public class Analyzer extends Thread{
                 avgX += locationAsPercent[grouping.get(i)];
             }
             avgX = (int)((double)avgX / (double)grouping.size());
+            Log.i("AvgX", "" + avgX);*/
+
+            //find multi-color groupings within 10% of a screen slice
+            int groupSize = 1;
+            //ArrayList<Integer> grouping = new ArrayList<Integer>();
+            Group grouping = new Group();
+            int minX=100, maxX=0;
+            boolean grouped = false;
+
+            for(int color1 = 0; color1 < numColors - 1; color1++){
+                int tempSize = 1;
+                Group tempGroup = new Group();
+                for(int centroid1 = 0; centroid1 < centroids[color1].size(); centroid1++) {
+                    int lapj = (int) ((centroids[color1].get(centroid1).x / (double) frameWidth) * 100d);
+                    for (int color2 = color1 + 1; color2 < numColors; color2++) {
+                        for(int centroid2 = 0; centroid2 < centroids[color2].size(); centroid2++) {
+                            int lapm = (int) ((centroids[color2].get(centroid2).x / (double) frameWidth) * 100d);
+                            //for the simplistic two color we're implementing, do this, otherwise if I ever grow this to the 8,
+                            //do a modified Dijsktra's to create a path no more than 10% from centroid to centroid, and toss it as
+                            //a group as soon as it grows too big
+                            if (Math.abs(lapm - lapj) <= 10) { // <--- screen size as %
+                                tempSize++;
+                                //neither color is added yet
+                                if(!tempGroup.colorIDs.contains(color1) && !tempGroup.colorIDs.contains(color2)) {
+                                    tempGroup.colorIDs.add(color1);
+                                    tempGroup.centroidIDs.add(centroid1);
+                                    tempGroup.colorIDs.add(color2);
+                                    tempGroup.centroidIDs.add(centroid2);
+                                }
+                                //color1 exists, 2 doesn't - for bigger version
+                                /*else if(!tempGroup.colorIDs.contains(color2)){
+
+                                }
+                                //color2 exists, 1 doesn't - for bigger version
+                                else if (!tempGroup.colorIDs.contains(color1)){
+
+                                }*/
+                                //both exist
+                                else{
+                                    int c1idx = tempGroup.colorIDs.indexOf(color1);
+                                    int c2idx = tempGroup.colorIDs.indexOf(color2);
+                                    double curDist = distanceSquared(centroids[color1].get(tempGroup.centroidIDs.get(c1idx)),
+                                            centroids[color2].get(tempGroup.centroidIDs.get(c2idx)));
+                                    double newDist = distanceSquared(centroids[color1].get(centroid1),
+                                            centroids[color2].get(centroid2));
+                                    if(newDist < curDist){
+                                        tempGroup.colorIDs.clear();
+                                        tempGroup.centroidIDs.clear();
+                                        tempGroup.colorIDs.add(color1);
+                                        tempGroup.centroidIDs.add(centroid1);
+                                        tempGroup.colorIDs.add(color2);
+                                        tempGroup.centroidIDs.add(centroid2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (tempSize > groupSize) {
+                    groupSize = tempSize;
+                    grouping = tempGroup;
+                } else if (tempSize == groupSize && color1 == 0) {
+                    grouping = tempGroup;
+                }
+            }
+            if(grouping.centroidIDs.size() > 1){
+                grouped = true;
+            }
+            /*for(int i=0; i < grouping.size(); i++){
+                Log.i("Group", "includes " + i + " at " + locationAsPercent[i]);
+            }*/
+
+            //find "average x" value
+            int avgX = locationAsPercent[0];
+            if(grouped) {
+                for (int i = 0; i < grouping.centroidIDs.size(); i++) {
+                    avgX += centroids[grouping.colorIDs.get(i)].get(grouping.centroidIDs.get(i)).x;
+                }
+                avgX = (int) ((double) avgX / (double) grouping.colorIDs.size());
+            }
             Log.i("AvgX", "" + avgX);
 
             if (!wait) {
@@ -269,6 +349,12 @@ public class Analyzer extends Thread{
     private double distanceFromLastTrackedCentroid(int centroid, Point p){
         return Math.sqrt(Math.abs(lastTrackedCentroid[centroid].x * lastTrackedCentroid[centroid].x - p.x * p.x) +
                 Math.abs(lastTrackedCentroid[centroid].y * lastTrackedCentroid[centroid].y - p.y * p.y));
+    }
+
+    private double distanceSquared(Point a, Point b){
+        double xDiff = a.x - b.x;
+        double yDiff = a.y - b.y;
+        return xDiff * xDiff + yDiff * yDiff;
     }
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
