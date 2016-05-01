@@ -19,7 +19,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.ninjapiratestudios.trackercamera.BTApplication;
 import com.ninjapiratestudios.trackercamera.R;
+
+import org.opencv.core.Point;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,12 +93,12 @@ public class ConfigurationFragment extends Fragment {
         container.addView(mImageView);
         mImageView.setOnTouchListener(new View.OnTouchListener(){
             @Override
-            public boolean onTouch(View v, MotionEvent e)
-            {
+            public boolean onTouch(View v, MotionEvent e) {
                 Float xLocation = e.getX();
-                Float yLocation = mImageView.getMaxHeight()- e.getY();
+                Float yLocation = mImageView.getMaxHeight() - e.getY();
                 mImageView.getHeight();
-               return true;
+                storeColorSelection(new Point(xLocation, yLocation));
+                return true;
             }
         });
         return inflater.inflate(R.layout.fragment_configuration, container, false);
@@ -103,17 +106,17 @@ public class ConfigurationFragment extends Fragment {
 
 
     private File createImageFile() throws IOException {
-    // Create an image file name
-    String imageFileName = "JPEG_" + "ConfigPhoto" + "_";
-    File storageDir = Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES);
-    File image = File.createTempFile(
-        imageFileName,  /* prefix */
-        ".jpg",         /* suffix */
-        storageDir      /* directory */
-    );
+        // Create an image file name
+        String imageFileName = "JPEG_" + "ConfigPhoto" + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
 
-    // Save a file: path for use with ACTION_VIEW intents
+        // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
@@ -139,7 +142,7 @@ public class ConfigurationFragment extends Fragment {
         }
     }
 
-        private void setPic() {
+    private void setPic() {
         // Get the dimensions of the View
         int targetW = mImageView.getWidth();
         int targetH = mImageView.getHeight();
@@ -160,13 +163,24 @@ public class ConfigurationFragment extends Fragment {
         bmOptions.inPurgeable = true;
 
         this.bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-            Integer size = this.bitmap.getRowBytes()*this.bitmap.getHeight();
-            ByteBuffer b = ByteBuffer.allocate(size);
-            this.bitmap.copyPixelsToBuffer(b);
-            byte[] bytes = new byte[size];
-            b.get(bytes,0,bytes.length);
+        Integer size = this.bitmap.getRowBytes()*this.bitmap.getHeight();
+        ByteBuffer b = ByteBuffer.allocate(size);
+        this.bitmap.copyPixelsToBuffer(b);
+        byte[] bytes = new byte[size];
+        b.get(bytes,0,bytes.length);
+        storeImageBytes(bytes);
 
         mImageView.setImageBitmap(this.bitmap);
+    }
+
+    public void storeImageBytes(byte[] bytes){
+        BTApplication bta = (BTApplication)this.getContext().getApplicationContext();
+        bta.setImageBytes(bytes);
+    }
+
+    public void storeColorSelection(Point p){
+        BTApplication bta = (BTApplication)this.getContext().getApplicationContext();
+        bta.setColorSelection(p);
     }
 
     public void selectNewColors() {

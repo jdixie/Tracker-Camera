@@ -35,6 +35,7 @@ import android.view.View.OnTouchListener;
 import android.view.SurfaceView;
 
 public class Analyzer extends Thread{
+    private final int MAX_COLORS = 2;
     private boolean isColorSelected = false;
     //Mat used for frame analysis
     private Mat rgba;
@@ -42,11 +43,12 @@ public class Analyzer extends Thread{
     public static boolean wait = false;
 
     //selected color variables
-    private Scalar blobColorRgba;
-    private Scalar blobColorHsv;
+    private Scalar[] blobColorRgba;
+    private Scalar[] blobColorHsv;
+    private int numColors;
 
     //detector is the go between to OpenCV to find blobs/contours
-    private ColorBlobDetector detector;
+    private ColorBlobDetector[] detector = new ColorBlobDetector[MAX_COLORS];
 
     //used to show color range of selected color, and color of contour outline
     //TODO: remove in next iteration
@@ -69,10 +71,11 @@ public class Analyzer extends Thread{
     private boolean frameAnalyzed = true;
     private boolean stopRecording = false;
 
-    List<MatOfPoint> contours;
-    ArrayList<Point> centroids;
+    List<MatOfPoint>[] contours = new List[8];
+    ArrayList<Point>[] centroids = new ArrayList[8];
 
-    Point lastTrackedCentroid = null;
+    Point lastTrackedCentroid[] = new Point[8];
+    int[] locationAsPercent = new int[8];
 
     // provides a reference to the main activity
     VideoActivity activity;
@@ -84,17 +87,29 @@ public class Analyzer extends Thread{
         frameHeight = h;
         center = new Point(frameWidth/2.0, frameHeight/2.0);
         rgba = new Mat(frameHeight, frameWidth, CvType.CV_8UC4);
-        detector = new ColorBlobDetector();
         spectrum = new Mat();
-        blobColorRgba = new Scalar(255);
-        blobColorHsv = new Scalar(255);
+        numColors = 0;
+        blobColorHsv = new Scalar[MAX_COLORS];
+        blobColorRgba = new Scalar[MAX_COLORS];
+        for(int i = 0; i < MAX_COLORS; i++) {
+            detector[i] = new ColorBlobDetector();
+            blobColorRgba[i] = new Scalar(255);
+            blobColorHsv[i] = new Scalar(255);
+            centroids[i] = new ArrayList<Point>();
+        }
         SPECTRUM_SIZE = new Size(200, 64);
         CONTOUR_COLOR = new Scalar(255,0,0,255);
         Mat frame = new Mat(frameHeight + (frameHeight / 2), frameWidth, CvType.CV_8UC1);
         cameraAccessFrame = new CameraAccessFrame(frame, frameWidth, frameHeight);
-        centroids = new ArrayList<Point>();
         this.params = params;
         this.activity = activity;
+
+        //check for color selection in app
+        BTApplication bta = (BTApplication)this.activity.getApplication();
+        if(bta.colorsSelected > 0){
+
+            isColorSelected = true;
+        }
     }
 
     public void onCameraViewStopped() {
@@ -135,52 +150,167 @@ public class Analyzer extends Thread{
         frameAnalyzed = false;
 
         if (isColorSelected) {
-            //process frame
-            detector.process(rgba);
-            contours = detector.getContours();
-            Log.i("Contours count", " " + contours.size());
+            for(int k = 0; k < numColors; k++) {
+                //process frame
+                detector[k].process(rgba);
+                contours[k] = detector[k].getContours();
+                Log.i("Contours count", " " + contours[k].size());
 
-            //find centroids for each found contour
-            Moments moments;
-            Point p;
-            centroids.clear();
-            Overlay.toggleReady();
-            Overlay.clearBlobs();
+                //find centroids for each found contour
+                Moments moments;
+                Point p;
+                centroids[k].clear();
+                Overlay.toggleReady();
+                Overlay.clearBlobs();
 
-            for(int i = 0; i < contours.size(); i++){
-                moments = Imgproc.moments(contours.get(i));
-                p = new Point();
+                for (int i = 0; i < contours[k].size(); i++) {
+                    moments = Imgproc.moments(contours[k].get(i));
+                    p = new Point();
 
-                p.x = moments.get_m10() / moments.get_m00();
-                p.y = moments.get_m01() / moments.get_m00();
-                Log.i("Centroid", p.x + ", " + p.y);
-                centroids.add(p);
-                Overlay.addBlob(p);
-            }
-            Overlay.toggleReady();
+                    p.x = moments.get_m10() / moments.get_m00();
+                    p.y = moments.get_m01() / moments.get_m00();
+                    Log.i("Centroid", p.x + ", " + p.y);
+                    centroids[k].add(p);
+                    Overlay.addBlob(p);
+                }
+                Overlay.toggleReady();
 
-            if(lastTrackedCentroid == null){
-                Double shortestFromCenter = Double.POSITIVE_INFINITY;
-                for(Point t:centroids){
-                    if(distanceFromCenter(t) < shortestFromCenter){
-                        lastTrackedCentroid = t;
+                if (lastTrackedCentroid[k] == null) {
+                    Double shortestFromCenter = Double.POSITIVE_INFINITY;
+                    for (Point t : centroids[k]) {
+                        if (distanceFromCenter(t) < shortestFromCenter) {
+                            lastTrackedCentroid[k] = t;
+                        }
+                    }
+                } else {
+                    Double shortestFromLastCentroid = Double.POSITIVE_INFINITY;
+                    for (Point t : centroids[k]) {
+                        if (distanceFromLastTrackedCentroid(k, t) < shortestFromLastCentroid) {
+                            lastTrackedCentroid[k] = t;
+                        }
                     }
                 }
+
+
+                locationAsPercent[k] = (int) ((lastTrackedCentroid[k].x / (double) frameWidth) * 100d);
+                Log.i("Loc", "" + locationAsPercent[k]);
             }
-            else{
-                Double shortestFromLastCentroid = Double.POSITIVE_INFINITY;
-                for(Point t:centroids){
-                    if(distanceFromLastTrackedCentroid(t) < shortestFromLastCentroid){
-                        lastTrackedCentroid = t;
+
+            //find multi-color groupings within 10% of a screen slice
+            /*int groupSize = 1;
+            ArrayList<Integer> grouping = new ArrayList<Integer>();
+            for(int i = 0; i < numColors - 1; i++){
+                int tempSize = 1;
+                ArrayList<Integer> tempGroup = new ArrayList<Integer>();
+                tempGroup.add(i);
+                for(int j = i+1; j < numColors; j++){
+                    if(Math.abs(locationAsPercent[i] - locationAsPercent[j]) <= 10){ // <--- screen size as %
+                        tempSize++;
+                        tempGroup.add(j);
                     }
                 }
+                if(tempSize > groupSize){
+                    groupSize = tempSize;
+                    grouping = tempGroup;
+                }
+                else if(tempSize == groupSize && i == 0){
+                    grouping = tempGroup;
+                }
             }
+            if(grouping.size() == 0){
+                grouping.add(0);
+            }
+            for(int i=0; i < grouping.size(); i++){
+                Log.i("Group", "includes " + i + " at " + locationAsPercent[i]);
+            }
+            //find "average x" value
+            int avgX = 0;
+            for(int i = 0; i < grouping.size(); i++){
+                avgX += locationAsPercent[grouping.get(i)];
+            }
+            avgX = (int)((double)avgX / (double)grouping.size());
+            Log.i("AvgX", "" + avgX);*/
 
+            //find multi-color groupings within 10% of a screen slice
+            int groupSize = 1;
+            //ArrayList<Integer> grouping = new ArrayList<Integer>();
+            Group grouping = new Group();
+            int minX=100, maxX=0;
+            boolean grouped = false;
 
-            int locationAsPercent = (int)((lastTrackedCentroid.x / (double) frameWidth) * 100d);
-            Log.i("Loc", "" + locationAsPercent);
-            if(!wait) {
-                if (Math.abs(locationAsPercent - 50) > EPSILON) {
+            for(int color1 = 0; color1 < numColors - 1; color1++){
+                int tempSize = 1;
+                Group tempGroup = new Group();
+                for(int centroid1 = 0; centroid1 < centroids[color1].size(); centroid1++) {
+                    int lapj = (int) ((centroids[color1].get(centroid1).x / (double) frameWidth) * 100d);
+                    for (int color2 = color1 + 1; color2 < numColors; color2++) {
+                        for(int centroid2 = 0; centroid2 < centroids[color2].size(); centroid2++) {
+                            int lapm = (int) ((centroids[color2].get(centroid2).x / (double) frameWidth) * 100d);
+                            //for the simplistic two color we're implementing, do this, otherwise if I ever grow this to the 8,
+                            //do a modified Dijsktra's to create a path no more than 10% from centroid to centroid, and toss it as
+                            //a group as soon as it grows too big
+                            if (Math.abs(lapm - lapj) <= 10) { // <--- screen size as %
+                                tempSize++;
+                                //neither color is added yet
+                                if(!tempGroup.colorIDs.contains(color1) && !tempGroup.colorIDs.contains(color2)) {
+                                    tempGroup.colorIDs.add(color1);
+                                    tempGroup.centroidIDs.add(centroid1);
+                                    tempGroup.colorIDs.add(color2);
+                                    tempGroup.centroidIDs.add(centroid2);
+                                }
+                                //color1 exists, 2 doesn't - for bigger version
+                                /*else if(!tempGroup.colorIDs.contains(color2)){
+                                }
+                                //color2 exists, 1 doesn't - for bigger version
+                                else if (!tempGroup.colorIDs.contains(color1)){
+                                }*/
+                                //both exist
+                                else{
+                                    int c1idx = tempGroup.colorIDs.indexOf(color1);
+                                    int c2idx = tempGroup.colorIDs.indexOf(color2);
+                                    double curDist = distanceSquared(centroids[color1].get(tempGroup.centroidIDs.get(c1idx)),
+                                            centroids[color2].get(tempGroup.centroidIDs.get(c2idx)));
+                                    double newDist = distanceSquared(centroids[color1].get(centroid1),
+                                            centroids[color2].get(centroid2));
+                                    if(newDist < curDist){
+                                        tempGroup.colorIDs.clear();
+                                        tempGroup.centroidIDs.clear();
+                                        tempGroup.colorIDs.add(color1);
+                                        tempGroup.centroidIDs.add(centroid1);
+                                        tempGroup.colorIDs.add(color2);
+                                        tempGroup.centroidIDs.add(centroid2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (tempSize > groupSize) {
+                    groupSize = tempSize;
+                    grouping = tempGroup;
+                } else if (tempSize == groupSize && color1 == 0) {
+                    grouping = tempGroup;
+                }
+            }
+            if(grouping.centroidIDs.size() > 1){
+                grouped = true;
+            }
+            /*for(int i=0; i < grouping.size(); i++){
+                Log.i("Group", "includes " + i + " at " + locationAsPercent[i]);
+            }*/
+
+            //find "average x" value
+            int avgX = locationAsPercent[0];
+            if(grouped) {
+                for (int i = 0; i < grouping.centroidIDs.size(); i++) {
+                    avgX += centroids[grouping.colorIDs.get(i)].get(grouping.centroidIDs.get(i)).x;
+                }
+                avgX = (int) ((double) avgX / (double) grouping.colorIDs.size());
+            }
+            Log.i("AvgX", "" + avgX);
+
+            if (!wait) {
+                if (Math.abs(avgX - 50) > EPSILON) {
                     int zoom = params.getZoomRatios().get(params.getZoom()).intValue();
                     Camera.Size sz = params.getPreviewSize();
                     double aspect = (double) sz.width / (double) sz.height;
@@ -190,19 +320,18 @@ public class Analyzer extends Thread{
                     thetaH = (2d * Math.atan(100d * Math.tan(thetaH / 2d) / zoom)) / (Math.PI) * 180d;
                     Date sendingAt = new Date();
                     Log.i("Analyze time", (sendingAt.getTime() - now.getTime() + "ms; ThetaH: " + thetaH));
-                    if (locationAsPercent > 60) {
-                        activity.turnRight((int) -(Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))/2d));
-                        Log.i("Spin", "" + (int) -(Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))));
+                    if (avgX > 60) {
+                        //activity.turnRight((int) -(Math.abs((avgX / 100d * thetaH) - (.5 * thetaH)) / 2d));
+                        Log.i("Spin", "" + (int) -(Math.abs((avgX / 100d * thetaH) - (.5 * thetaH))));
                     } else {
-                        activity.turnLeft((int) (Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))/2d));
-                        Log.i("Spin", "" + (int) (Math.abs((locationAsPercent / 100d * thetaH) - (.5 * thetaH))));
+                        //activity.turnLeft((int) (Math.abs((avgX / 100d * thetaH) - (.5 * thetaH)) / 2d));
+                        Log.i("Spin", "" + (int) (Math.abs((avgX / 100d * thetaH) - (.5 * thetaH))));
                     }
                     //wait = true;
                 /*try {
                     Thread.sleep(1000);
                 }
                 catch(InterruptedException e){
-
                 }*/
                 }
             }
@@ -220,9 +349,15 @@ public class Analyzer extends Thread{
         return Math.sqrt(Math.abs(center.x * center.x - p.x * p.x) + Math.abs(center.y * center.y - p.y * p.y));
     }
 
-    private double distanceFromLastTrackedCentroid(Point p){
-        return Math.sqrt(Math.abs(lastTrackedCentroid.x * lastTrackedCentroid.x - p.x * p.x) +
-                Math.abs(lastTrackedCentroid.y * lastTrackedCentroid.y - p.y * p.y));
+    private double distanceFromLastTrackedCentroid(int centroid, Point p){
+        return Math.sqrt(Math.abs(lastTrackedCentroid[centroid].x * lastTrackedCentroid[centroid].x - p.x * p.x) +
+                Math.abs(lastTrackedCentroid[centroid].y * lastTrackedCentroid[centroid].y - p.y * p.y));
+    }
+
+    private double distanceSquared(Point a, Point b){
+        double xDiff = a.x - b.x;
+        double yDiff = a.y - b.y;
+        return xDiff * xDiff + yDiff * yDiff;
     }
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
@@ -253,23 +388,24 @@ public class Analyzer extends Thread{
         Imgproc.cvtColor(regionRgba, regionHsv, Imgproc.COLOR_RGB2HSV_FULL);
 
         //calculate average color of selection
-        blobColorHsv = Core.sumElems(regionHsv);
+        blobColorHsv[0] = Core.sumElems(regionHsv);
         int pointCount = rect.width*rect.height;
-        for (int i = 0; i < blobColorHsv.val.length; i++)
-            blobColorHsv.val[i] /= pointCount;
+        for (int i = 0; i < blobColorHsv[0].val.length; i++)
+            blobColorHsv[0].val[i] /= pointCount;
 
-        blobColorRgba = converScalarHsv2Rgba(blobColorHsv);
+        blobColorRgba[0] = converScalarHsv2Rgba(blobColorHsv[0]);
 
-        Log.i("Color", "Selected rgba color: (" + blobColorRgba.val[0] + ", " + blobColorRgba.val[1] +
-                ", " + blobColorRgba.val[2] + ", " + blobColorRgba.val[3] + ")");
+        Log.i("Color", "Selected rgba color: (" + blobColorRgba[0].val[0] + ", " + blobColorRgba[0].val[1] +
+                ", " + blobColorRgba[0].val[2] + ", " + blobColorRgba[0].val[3] + ")");
 
-        detector.setHsvColor(blobColorHsv);
+        detector[0].setHsvColor(blobColorHsv[0]);
 
-        Imgproc.resize(detector.getSpectrum(), spectrum, SPECTRUM_SIZE);
+        Imgproc.resize(detector[0].getSpectrum(), spectrum, SPECTRUM_SIZE);
 
         regionRgba.release();
         regionHsv.release();
 
+        numColors = 1;
         isColorSelected = true;
     }
 
