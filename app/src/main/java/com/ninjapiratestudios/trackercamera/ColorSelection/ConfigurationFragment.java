@@ -48,14 +48,17 @@ public class ConfigurationFragment extends Fragment {
     //Request image capture request value
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    ImageView mImageView;
+    private ImageView mImageView;
+
+    private Bitmap bitmap;
+
+    private byte[] pictureAsBytes;
 
     private OnColorsSelectedListener mListener;
-
+    private ArrayList<Float[]> colors;
     private View.OnTouchListener mTouchListener;
     private String mCurrentPhotoPath;
     private static final int REQUEST_TAKE_PHOTO = 1;
-
     public ConfigurationFragment() {
         // Required empty public constructor
     }
@@ -90,15 +93,9 @@ public class ConfigurationFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent e)
             {
                 Float xLocation = e.getX();
-                mImageView.getHeight();
                 Float yLocation = mImageView.getMaxHeight()- e.getY();
-                Bitmap original_bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
-                Integer size = original_bitmap.getRowBytes()*original_bitmap.getHeight();
-                ByteBuffer b = ByteBuffer.allocate(size);
-                original_bitmap.copyPixelsToBuffer(b);
-                byte[] bytes = new byte[size];
-                b.get(bytes,0,bytes.length);
-
+                mImageView.getHeight();
+               return true;
             }
         });
         return inflater.inflate(R.layout.fragment_configuration, container, false);
@@ -107,8 +104,7 @@ public class ConfigurationFragment extends Fragment {
 
     private File createImageFile() throws IOException {
     // Create an image file name
-    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-    String imageFileName = "JPEG_" + timeStamp + "_";
+    String imageFileName = "JPEG_" + "ConfigPhoto" + "_";
     File storageDir = Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES);
     File image = File.createTempFile(
@@ -163,8 +159,14 @@ public class ConfigurationFragment extends Fragment {
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        mImageView.setImageBitmap(bitmap);
+        this.bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+            Integer size = this.bitmap.getRowBytes()*this.bitmap.getHeight();
+            ByteBuffer b = ByteBuffer.allocate(size);
+            this.bitmap.copyPixelsToBuffer(b);
+            byte[] bytes = new byte[size];
+            b.get(bytes,0,bytes.length);
+
+        mImageView.setImageBitmap(this.bitmap);
     }
 
     public void selectNewColors() {
@@ -172,6 +174,10 @@ public class ConfigurationFragment extends Fragment {
         }
     }
 
+    public void doneSelectingColors()
+    {
+
+    }
 
     @Override
     public void onAttach(Context context) {

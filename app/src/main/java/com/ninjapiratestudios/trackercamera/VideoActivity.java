@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
-import com.ninjapiratestudios.trackercamera.ColorSelection.ColorSelectionFragment;
 import com.ninjapiratestudios.trackercamera.ColorSelection.ConfigurationFragment;
 import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
 
