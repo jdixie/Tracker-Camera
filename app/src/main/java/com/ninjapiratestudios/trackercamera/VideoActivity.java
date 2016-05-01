@@ -1,6 +1,7 @@
 package com.ninjapiratestudios.trackercamera;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -15,11 +16,14 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import com.ninjapiratestudios.trackercamera.ColorSelection.ColorSelectionFragment;
+import com.ninjapiratestudios.trackercamera.ColorSelection.ConfigurationFragment;
 import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
 
 import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Locale;
 
 /**
@@ -27,7 +31,8 @@ import java.util.Locale;
  * status bar and navigation/system bar) with user interaction.
  */
 public class VideoActivity extends FragmentActivity implements
-        ItemFragment.OnListFragmentInteractionListener, VideoFragment.OnVideoAddedListener{
+        ItemFragment.OnListFragmentInteractionListener, VideoFragment.OnVideoAddedListener,
+        ColorSelectionFragment.OnSelectColorsListener, ConfigurationFragment.OnColorsSelectedListener {
     public final static String LOG_TAG = "VIDEO_ACTIVITY";
     private boolean overlayThreadRunning = true;
     private ViewPager mViewPager;
@@ -37,6 +42,16 @@ public class VideoActivity extends FragmentActivity implements
     Thread overlayHelper;
     PowerManager powerManager;
     WakeLock wakeLock;
+
+    public void selectNewColors()
+    {
+
+    }
+
+    public void colorsSelected(ArrayList<Color> color)
+    {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,6 +215,7 @@ public class VideoActivity extends FragmentActivity implements
             return null;
         }
     }
+
 
     private class OverlayThread extends Thread {
         @Override
