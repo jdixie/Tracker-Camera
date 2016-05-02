@@ -31,7 +31,7 @@ import java.util.Locale;
  */
 public class VideoActivity extends FragmentActivity implements
         ItemFragment.OnListFragmentInteractionListener, VideoFragment.OnVideoAddedListener,
-        ColorSelectionFragment.OnSelectColorsListener, ConfigurationFragment.OnColorsSelectedListener {
+        ConfigurationFragment.OnColorsSelectedListener {
     public final static String LOG_TAG = "VIDEO_ACTIVITY";
     private boolean overlayThreadRunning = true;
     private ViewPager mViewPager;

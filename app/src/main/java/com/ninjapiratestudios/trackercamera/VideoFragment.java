@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -48,7 +49,6 @@ public class VideoFragment extends Fragment {
         buttonLL.addView(recordButton);
         buttonLL.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
         preview.addView(buttonLL);
-
         recordButton.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
