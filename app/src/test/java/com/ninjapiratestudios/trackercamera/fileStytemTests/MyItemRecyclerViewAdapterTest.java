@@ -1,4 +1,5 @@
 package com.ninjapiratestudios.trackercamera.fileStytemTests;
+import com.ninjapiratestudios.trackercamera.BaseTest;
 import com.ninjapiratestudios.trackercamera.fileSystem.ItemFragment;
 import com.ninjapiratestudios.trackercamera.fileSystem.MyItemRecyclerViewAdapter;
 import com.ninjapiratestudios.trackercamera.fileSystem.fileContent.FileContent;
@@ -18,7 +19,7 @@ import static org.junit.Assert.assertEquals;
  * @version 1.0
  * @date 3/20/2016
  */
-public class MyItemRecyclerViewAdapterTest extends BaseTest{
+public class MyItemRecyclerViewAdapterTest extends BaseTest {
 
     MyItemRecyclerViewAdapter mIRVA;
     @Before
@@ -27,7 +28,7 @@ public class MyItemRecyclerViewAdapterTest extends BaseTest{
         ItemFragment.OnListFragmentInteractionListener oLFIL = Mockito.mock(ItemFragment.OnListFragmentInteractionListener.class);
         File[] files = super.generateExternalStorageFileMockObjects();
         FileContent fC = super.generateFileContentLength8(files);
-        mIRVA = new MyItemRecyclerViewAdapter(fC.getItems(),oLFIL);
+       // mIRVA = new MyItemRecyclerViewAdapter(fC.getItems(),oLFIL);
     }
 
 

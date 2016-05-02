@@ -1,11 +1,13 @@
-package com.ninjapiratestudios.trackercamera.fileStytemTests;
+package com.ninjapiratestudios.trackercamera;
 
 import android.app.FragmentManager;
 import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.ninjapiratestudios.trackercamera.FileNameDialog;
+import com.ninjapiratestudios.trackercamera.CameraRecorder;
+import com.ninjapiratestudios.trackercamera.PopupDialog;
+import com.ninjapiratestudios.trackercamera.VideoActivity;
 
 import junit.framework.Assert;
 
@@ -24,7 +26,7 @@ import org.powermock.reflect.Whitebox;
  * @author John Qualls
  * @version 3/21/2016
  */
-@PrepareForTest({CameraRecorder.class, Camera.class, FileNameDialog.class,
+@PrepareForTest({CameraRecorder.class, Camera.class, PopupDialog.class,
         Log.class})
 @RunWith(PowerMockRunner.class)
 public class CameraRecorderTest extends BaseTest {
@@ -57,14 +59,14 @@ public class CameraRecorderTest extends BaseTest {
     }
 
     @Test
-    public void displayFileNameDialogTest() {
+    public void displayPopupDialogTest() {
         VideoActivity activityMock = Mockito.mock(VideoActivity.class);
         FragmentManager expectedArg1 = Mockito.mock(FragmentManager.class);
-        FileNameDialog mockDialog = Mockito.mock(FileNameDialog.class);
+        PopupDialog mockDialog = Mockito.mock(PopupDialog.class);
         // Test setup
         try {
-            PowerMockito.mockStatic(FileNameDialog.class);
-            PowerMockito.when(FileNameDialog.newInstance(cameraRecorder))
+            PowerMockito.mockStatic(PopupDialog.class);
+            PowerMockito.when(PopupDialog.newFileNameDialog(cameraRecorder))
                     .thenReturn(mockDialog);
             Whitebox.setInternalState(cameraRecorder, "activity", activityMock);
             Mockito.when(activityMock.getFragmentManager()).thenReturn
@@ -82,7 +84,7 @@ public class CameraRecorderTest extends BaseTest {
 
         // Execute test
         try {
-            Mockito.verify(mockDialog).show(expectedArg1, FileNameDialog
+            Mockito.verify(mockDialog).show(expectedArg1, PopupDialog
                     .FRAGMENT_TAG);
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_EXECUTE_ERROR + e.getMessage());

@@ -1,4 +1,4 @@
-package com.ninjapiratestudios.trackercamera.fileStytemTests;
+package com.ninjapiratestudios.trackercamera;
 
 import com.ninjapiratestudios.trackercamera.fileSystem.fileContent.FileContent;
 
