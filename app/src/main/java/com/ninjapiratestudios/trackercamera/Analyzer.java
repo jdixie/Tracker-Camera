@@ -318,10 +318,10 @@ public class Analyzer{
                     Date sendingAt = new Date();
                     Log.i("Analyze time", (sendingAt.getTime() - now.getTime() + "ms; ThetaH: " + thetaH));
                     if (avgX > 60) {
-                        //activity.turnRight((int) -(Math.abs((avgX / 100d * thetaH) - (.5 * thetaH)) / 2d));
+                        activity.turnRight((int) -(Math.abs((avgX / 100d * thetaH) - (.5 * thetaH)) / 2d));
                         Log.i("Spin", "" + (int) -(Math.abs((avgX / 100d * thetaH) - (.5 * thetaH))));
                     } else {
-                        //activity.turnLeft((int) (Math.abs((avgX / 100d * thetaH) - (.5 * thetaH)) / 2d));
+                        activity.turnLeft((int) (Math.abs((avgX / 100d * thetaH) - (.5 * thetaH)) / 2d));
                         Log.i("Spin", "" + (int) (Math.abs((avgX / 100d * thetaH) - (.5 * thetaH))));
                     }
                     //wait = true;

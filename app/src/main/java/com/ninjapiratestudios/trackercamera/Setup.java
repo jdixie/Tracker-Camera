@@ -12,7 +12,7 @@ import java.util.TimerTask;
 public class Setup extends Activity {
 	
 	private final String TAG = "BluetoothLog";//To isolate
-   //BTApplication application = ((BTApplication)this.getApplicationContext());
+    //BTApplication application = ((BTApplication)this.getApplicationContext());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +21,7 @@ public class Setup extends Activity {
         final Context context;
         context = this.getApplicationContext();
 
-        /*if(((BTApplication)this.getApplicationContext()).mBluetooth.startBluetooth())
+        if(((BTApplication)this.getApplicationContext()).mBluetooth.startBluetooth())
             ((BTApplication)this.getApplicationContext()).mBluetooth.discover_helper();
         else
             alertUser();
@@ -37,8 +37,8 @@ public class Setup extends Activity {
                 }
                 goToVideoActivity();
             }
-        }.start();*/
-        debugStartVideoActivity();
+        }.start();
+        //debugStartVideoActivity();
     }
 
     public void alertUser(){
