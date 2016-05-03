@@ -51,6 +51,8 @@ public class ConfigurationFragment extends Fragment {
     //Request image capture request value
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
+    static boolean mutex = false;
+
     private ImageView mImageView;
 
     private Bitmap bitmap;
@@ -88,9 +90,14 @@ public class ConfigurationFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         dispatchTakePictureIntent();
-        mImageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        setPic();
+        try {
+            Thread.sleep(15000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        mImageView = new ImageView(getContext());
         container.addView(mImageView);
+        mImageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         mImageView.setOnTouchListener(new View.OnTouchListener(){
             @Override
             public boolean onTouch(View v, MotionEvent e) {
@@ -137,9 +144,16 @@ public class ConfigurationFragment extends Fragment {
             if (photoFile != null) {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
+                //getActivity().setResult(getActivity().RESULT_OK, takePictureIntent);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        setPic();
     }
 
     private void setPic() {
@@ -169,7 +183,6 @@ public class ConfigurationFragment extends Fragment {
         byte[] bytes = new byte[size];
         b.get(bytes,0,bytes.length);
         storeImageBytes(bytes);
-
         mImageView.setImageBitmap(this.bitmap);
     }
 
