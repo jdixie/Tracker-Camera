@@ -34,7 +34,7 @@ import android.view.WindowManager;
 import android.view.View.OnTouchListener;
 import android.view.SurfaceView;
 
-public class Analyzer extends Thread{
+public class Analyzer{
     private final int MAX_COLORS = 2;
     private boolean isColorSelected = false;
     //Mat used for frame analysis
@@ -80,6 +80,8 @@ public class Analyzer extends Thread{
     // provides a reference to the main activity
     VideoActivity activity;
 
+    AnalyzerThread analyzerThread;
+
     private final int EPSILON = 10;
 
     public Analyzer(int w, int h, Camera.Parameters params, VideoActivity activity) {
@@ -124,7 +126,8 @@ public class Analyzer extends Thread{
         stopRecording = false;
         if(!readyForFrame && frameAnalyzed)
             readyForFrame = true;
-        start();
+        analyzerThread = new AnalyzerThread();
+        analyzerThread.start();
         Overlay.toggleDraw();
     }
 
@@ -403,69 +406,7 @@ public class Analyzer extends Thread{
         isColorSelected = true;
     }
 
-    @Override
-    public void run(){
-        if (!isColorSelected) {
-            //check for color selection in app
-            BTApplication bta = (BTApplication)activity.getApplication();
-            if(bta.colorsSelected > 0){
-                for(int i = 0; i < bta.colorsSelected; i++){
-                    Rect rect = new Rect();
 
-                    rect.x = (int)bta.points[i].x - 4;
-                    rect.y = (int)bta.points[i].y - 4;
-
-                    rect.width = 8;
-                    rect.height = 8;
-
-                    Mat regionRgba = rgba.submat(rect);
-
-                    Mat regionHsv = new Mat();
-                    Imgproc.cvtColor(regionRgba, regionHsv, Imgproc.COLOR_RGB2HSV_FULL);
-
-                    //calculate average color of selection
-                    blobColorHsv[i] = Core.sumElems(regionHsv);
-                    int pointCount = rect.width*rect.height;
-                    for (int j = 0; j < blobColorHsv[i].val.length; j++)
-                        blobColorHsv[i].val[j] /= pointCount;
-
-                    blobColorRgba[i] = converScalarHsv2Rgba(blobColorHsv[i]);
-
-                    Log.i("Color", "Selected rgba color: (" + blobColorRgba[i].val[0] + ", " + blobColorRgba[i].val[1] +
-                            ", " + blobColorRgba[i].val[2] + ", " + blobColorRgba[i].val[3] + ")");
-
-                    detector[i].setHsvColor(blobColorHsv[i]);
-
-                    Imgproc.resize(detector[i].getSpectrum(), spectrum, SPECTRUM_SIZE);
-
-                    regionRgba.release();
-                    regionHsv.release();
-
-                    numColors++;
-                }
-                isColorSelected = true;
-            }
-            else {
-                while (readyForFrame) {
-                    //wait for first frame
-                }
-                liveCalibrate();
-            }
-        }
-        while(!interrupted()) {
-            //if a frame is loaded and converted, the analyzer switches to "not ready for frame" so
-            //the frame can then be analyzed
-            if (!readyForFrame) {
-                analyze();
-            }
-            if (stopRecording) {
-                readyForFrame = false;
-                frameAnalyzed = true;
-                stopRecording = false;
-                interrupt();
-            }
-        }
-    }
 
     //got this class and interface from someone else in order to do the android camera to OpenCV image conversion
     private class CameraAccessFrame implements CameraFrame {
@@ -544,5 +485,71 @@ public class Analyzer extends Thread{
 
         @Override
         Mat gray();
+    }
+
+    public class AnalyzerThread extends Thread{
+        @Override
+        public void run(){
+            if (!isColorSelected) {
+                //check for color selection in app
+                BTApplication bta = (BTApplication)activity.getApplication();
+                if(bta.colorsSelected > 0){
+                    for(int i = 0; i < bta.colorsSelected; i++){
+                        Rect rect = new Rect();
+
+                        rect.x = (int)bta.points[i].x - 4;
+                        rect.y = (int)bta.points[i].y - 4;
+
+                        rect.width = 8;
+                        rect.height = 8;
+
+                        Mat regionRgba = rgba.submat(rect);
+
+                        Mat regionHsv = new Mat();
+                        Imgproc.cvtColor(regionRgba, regionHsv, Imgproc.COLOR_RGB2HSV_FULL);
+
+                        //calculate average color of selection
+                        blobColorHsv[i] = Core.sumElems(regionHsv);
+                        int pointCount = rect.width*rect.height;
+                        for (int j = 0; j < blobColorHsv[i].val.length; j++)
+                            blobColorHsv[i].val[j] /= pointCount;
+
+                        blobColorRgba[i] = converScalarHsv2Rgba(blobColorHsv[i]);
+
+                        Log.i("Color", "Selected rgba color: (" + blobColorRgba[i].val[0] + ", " + blobColorRgba[i].val[1] +
+                                ", " + blobColorRgba[i].val[2] + ", " + blobColorRgba[i].val[3] + ")");
+
+                        detector[i].setHsvColor(blobColorHsv[i]);
+
+                        Imgproc.resize(detector[i].getSpectrum(), spectrum, SPECTRUM_SIZE);
+
+                        regionRgba.release();
+                        regionHsv.release();
+
+                        numColors++;
+                    }
+                    isColorSelected = true;
+                }
+                else {
+                    while (readyForFrame) {
+                        //wait for first frame
+                    }
+                    liveCalibrate();
+                }
+            }
+            while(!interrupted()) {
+                //if a frame is loaded and converted, the analyzer switches to "not ready for frame" so
+                //the frame can then be analyzed
+                if (!readyForFrame) {
+                    analyze();
+                }
+                if (stopRecording) {
+                    readyForFrame = false;
+                    frameAnalyzed = true;
+                    stopRecording = false;
+                    interrupt();
+                }
+            }
+        }
     }
 }
