@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -13,6 +15,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+
+import com.ninjapiratestudios.trackercamera.ColorSelection.ConfigurationFragment;
 
 /**
  * An example full-screen activity that shows and hides the system<br/>
@@ -56,8 +60,7 @@ public class VideoFragment extends Fragment {
                     }
                 }
         );
-
-        Log.i(LOG_TAG, "VideoFragment layout constructed.");
+       Log.i(LOG_TAG, "VideoFragment layout constructed.");
         return preview;
     }
 

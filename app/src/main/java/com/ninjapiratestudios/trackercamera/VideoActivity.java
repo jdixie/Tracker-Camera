@@ -42,13 +42,7 @@ public class VideoActivity extends FragmentActivity implements
     PowerManager powerManager;
     WakeLock wakeLock;
 
-    public void selectNewColors()
-    {
-
-    }
-
-    public void colorsSelected(ArrayList<Color> color)
-    {
+    public void colorsSelected(ArrayList<Color> color) {
 
     }
 
@@ -65,7 +59,7 @@ public class VideoActivity extends FragmentActivity implements
         mViewPager.setAdapter(pagerAdapter);
 
 
-        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(360);
+        ((BTApplication) this.getApplicationContext()).mBluetooth.rotate(360);
         Overlay.setupGraphic(this);
         addContentView(Overlay.getGraphic(),
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
@@ -73,7 +67,7 @@ public class VideoActivity extends FragmentActivity implements
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 
         if (!OpenCVLoader.initDebug()) {
@@ -94,7 +88,7 @@ public class VideoActivity extends FragmentActivity implements
     }
 
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
         //overlayHelper.interrupt();
         overlayThreadRunning = false;
@@ -137,6 +131,7 @@ public class VideoActivity extends FragmentActivity implements
 
     /**
      * Getter for the Record Button.
+     *
      * @return a reference to the Record Button.
      */
     public ImageButton getRecordButton() {
@@ -145,6 +140,7 @@ public class VideoActivity extends FragmentActivity implements
 
     /**
      * Setter for the new Record Button.
+     *
      * @param recordButton The new Record Button object.
      */
     public void setRecordButton(ImageButton recordButton) {
@@ -156,8 +152,8 @@ public class VideoActivity extends FragmentActivity implements
      * the Record button
      */
     public void toggleRecordButton() {
-        if(recordButton != null) {
-            if(!stopImage) {
+        if (recordButton != null) {
+            if (!stopImage) {
                 stopImage = true;
                 recordButton.setImageResource(R.drawable.stop);
             } else {
@@ -175,20 +171,25 @@ public class VideoActivity extends FragmentActivity implements
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
         }
+
+        private ConfigurationFragment cF;
         private VideoFragment vF;
         private ItemFragment iF;
+
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                if(vF == null) {
+                cF = new ConfigurationFragment();
+                return cF;
+            } else if (position == 1) {
+                if (vF == null) {
                     vF = new VideoFragment();
                     return vF;
                 } else {
                     return vF;
                 }
             } else {
-                if(iF == null)
-                {
+                if (iF == null) {
                     iF = new ItemFragment();
                     return iF;
                 } else {
@@ -199,7 +200,7 @@ public class VideoActivity extends FragmentActivity implements
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -207,8 +208,10 @@ public class VideoActivity extends FragmentActivity implements
             Locale l = Locale.getDefault();
             switch (position) {
                 case 0:
-                    return getString(R.string.record_page).toUpperCase(l);
+                    return getString(R.string.configuration).toUpperCase(l);
                 case 1:
+                    return getString(R.string.record_page).toUpperCase(l);
+                case 2:
                     return getString(R.string.sharing).toUpperCase(l);
             }
             return null;
@@ -218,8 +221,8 @@ public class VideoActivity extends FragmentActivity implements
 
     private class OverlayThread extends Thread {
         @Override
-        public void run(){
-            while(overlayThreadRunning) {
+        public void run() {
+            while (overlayThreadRunning) {
                 //Log.i(LOG_TAG, "Overlay Thread Running!");
                 try {
 
@@ -240,13 +243,11 @@ public class VideoActivity extends FragmentActivity implements
         }
     }
 
-    public void turnLeft(int amount)
-    {
-        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(amount);
+    public void turnLeft(int amount) {
+        ((BTApplication) this.getApplicationContext()).mBluetooth.rotate(amount);
     }
 
-    public void turnRight(int amount)
-    {
-        ((BTApplication)this.getApplicationContext()).mBluetooth.rotate(amount);
+    public void turnRight(int amount) {
+        ((BTApplication) this.getApplicationContext()).mBluetooth.rotate(amount);
     }
 }

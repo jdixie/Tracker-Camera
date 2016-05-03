@@ -2,6 +2,7 @@
     <string name="app_name">Tracker Camera</string>
     <string name="record_page">Recorder</string>
     <string name="sharing">Sharing</string>
+    <string name="configuration">Configuration</string>
 
     <!-- Recording and Storing -->
     <string name="fn_dialog_title">Video File Name</string>
