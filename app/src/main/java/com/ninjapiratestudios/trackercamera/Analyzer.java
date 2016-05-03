@@ -103,6 +103,7 @@ public class Analyzer extends Thread{
         cameraAccessFrame = new CameraAccessFrame(frame, frameWidth, frameHeight);
         this.params = params;
         this.activity = activity;
+
     }
 
     public void onCameraViewStopped() {
@@ -216,7 +217,6 @@ public class Analyzer extends Thread{
             for(int i=0; i < grouping.size(); i++){
                 Log.i("Group", "includes " + i + " at " + locationAsPercent[i]);
             }
-
             //find "average x" value
             int avgX = 0;
             for(int i = 0; i < grouping.size(); i++){
@@ -254,11 +254,9 @@ public class Analyzer extends Thread{
                                 }
                                 //color1 exists, 2 doesn't - for bigger version
                                 /*else if(!tempGroup.colorIDs.contains(color2)){
-
                                 }
                                 //color2 exists, 1 doesn't - for bigger version
                                 else if (!tempGroup.colorIDs.contains(color1)){
-
                                 }*/
                                 //both exist
                                 else{
@@ -328,7 +326,6 @@ public class Analyzer extends Thread{
                     Thread.sleep(1000);
                 }
                 catch(InterruptedException e){
-
                 }*/
                 }
             }
@@ -409,10 +406,51 @@ public class Analyzer extends Thread{
     @Override
     public void run(){
         if (!isColorSelected) {
-            while(readyForFrame){
-                //wait for first frame
+            //check for color selection in app
+            BTApplication bta = (BTApplication)activity.getApplication();
+            if(bta.colorsSelected > 0){
+                for(int i = 0; i < bta.colorsSelected; i++){
+                    Rect rect = new Rect();
+
+                    rect.x = (int)bta.points[i].x - 4;
+                    rect.y = (int)bta.points[i].y - 4;
+
+                    rect.width = 8;
+                    rect.height = 8;
+
+                    Mat regionRgba = rgba.submat(rect);
+
+                    Mat regionHsv = new Mat();
+                    Imgproc.cvtColor(regionRgba, regionHsv, Imgproc.COLOR_RGB2HSV_FULL);
+
+                    //calculate average color of selection
+                    blobColorHsv[i] = Core.sumElems(regionHsv);
+                    int pointCount = rect.width*rect.height;
+                    for (int j = 0; j < blobColorHsv[i].val.length; j++)
+                        blobColorHsv[i].val[j] /= pointCount;
+
+                    blobColorRgba[i] = converScalarHsv2Rgba(blobColorHsv[i]);
+
+                    Log.i("Color", "Selected rgba color: (" + blobColorRgba[i].val[0] + ", " + blobColorRgba[i].val[1] +
+                            ", " + blobColorRgba[i].val[2] + ", " + blobColorRgba[i].val[3] + ")");
+
+                    detector[i].setHsvColor(blobColorHsv[i]);
+
+                    Imgproc.resize(detector[i].getSpectrum(), spectrum, SPECTRUM_SIZE);
+
+                    regionRgba.release();
+                    regionHsv.release();
+
+                    numColors++;
+                }
+                isColorSelected = true;
             }
-            liveCalibrate();
+            else {
+                while (readyForFrame) {
+                    //wait for first frame
+                }
+                liveCalibrate();
+            }
         }
         while(!interrupted()) {
             //if a frame is loaded and converted, the analyzer switches to "not ready for frame" so
