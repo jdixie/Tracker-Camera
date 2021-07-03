@@ -28,9 +28,9 @@ public class MyItemRecyclerViewAdapterTest extends BaseTest {
         ItemFragment.OnListFragmentInteractionListener oLFIL = Mockito.mock(ItemFragment.OnListFragmentInteractionListener.class);
         File[] files = super.generateExternalStorageFileMockObjects();
         FileContent fC = super.generateFileContentLength8(files);
-       // mIRVA = new MyItemRecyclerViewAdapter(fC.getItems(),oLFIL);
+        ItemFragment iF = Mockito.mock(ItemFragment.class);
+        mIRVA = new MyItemRecyclerViewAdapter(fC.getItems(),oLFIL, iF);
     }
-
 
     @Test
     public void getCountShouldReturn8()
@@ -42,12 +42,4 @@ public class MyItemRecyclerViewAdapterTest extends BaseTest {
         //then
         assertEquals(8, mIRVA.getItemCount());
     }
-
-    @Test
-    public void onCreateViewShouldcallRecycler()
-    {
-
-    }
-
-
 }

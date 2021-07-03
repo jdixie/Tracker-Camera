@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -35,13 +36,14 @@ public class PopupDialogTest extends BaseTest {
 
     private enum TestName {
         LAYOUT,
-        LISTENERS;
+        LISTENERS
     }
 
     @Before
     public void setup() {
         try {
-            dialog = Mockito.spy(new PopupDialog());
+            CameraRecorder camRecordMock = Mockito.mock(CameraRecorder.class);
+            dialog = Mockito.spy(PopupDialog.newFileNameDialog(camRecordMock));
         } catch (Exception e) {
             Assert.fail(UNIT_TEST_BEFORE_ERROR + e.getMessage());
         }

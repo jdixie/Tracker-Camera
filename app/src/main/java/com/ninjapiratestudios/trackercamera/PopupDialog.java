@@ -27,7 +27,7 @@ public class PopupDialog extends DialogFragment {
     private Setup setupActivity;
     public enum DialogType {
         FILE_NAME_DIALOG,
-        BLUETOOTH_ALERT;
+        BLUETOOTH_ALERT
     }
     private DialogType type;
     /**

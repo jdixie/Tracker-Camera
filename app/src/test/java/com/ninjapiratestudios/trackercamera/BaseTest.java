@@ -89,7 +89,7 @@ public class BaseTest {
     }
 
     /**
-     * Takes a takes a list of files, creates a FileContent object from the list,
+     * Takes a list of files, creates a FileContent object from the list,
      * and returns that objects to the caller.
      *
      * @param files - list of files.
